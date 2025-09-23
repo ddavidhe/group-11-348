@@ -1,4 +1,4 @@
-# Project
+# Milestone 0
 
 ## 1. Download SQLite
 SQLite is native to Linux/MacOS. If using Windows, you can download it here: https://www.sqlite.org/download.html
