@@ -26,6 +26,8 @@ conn = mysql.connector.connect(
 The community server will be on by default.
 - MacOS: Use spotlight search 'mysql' to find an interface in System Settings to turn it off and on.
 
+You will also need to initialize the database, which is a button in the 'mysql' tab of System Settings.
+
 ## 4. Run the Application
 Perform a "Hello World" by running the app.
 
