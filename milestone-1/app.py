@@ -21,11 +21,18 @@ with open("schema.sql", "r") as schema_file:
             cursor.execute(statement)
 
 # Seed data
-with open("sample_data.sql", "r") as data_file:
-    data_statements = data_file.read().split(';')
-    for statement in data_statements:
-        if statement.strip():
-            cursor.execute(statement)
+def seed(n, c):
+    with open(n, "r") as data_file:
+        data_statements = data_file.read().split(';')
+        for ds in data_statements:
+            if ds.strip():
+                c.execute(ds)
+
+seed("sample_data/sample_driver_data.sql", cursor)
+seed("sample_data/sample_points_data.sql", cursor)
+seed("sample_data/sample_constructors_data.sql", cursor)
+seed("sample_data/sample_races_data.sql", cursor)
+seed("sample_data/sample_results.sql", cursor)
 
 cursor.execute("SELECT * FROM drivers;")
 for row in cursor.fetchall():
