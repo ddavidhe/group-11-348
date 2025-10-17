@@ -156,7 +156,7 @@ class F1App(App):
     @on(DataTable.RowSelected)
     def on_data_table_cell_selected(self, event: DataTable.RowSelected) -> None:
         self.query_one(RichLog).write(event.row_key)
-        if event.row_key == "feature1":
+        if event.row_key == "feature1" or event.row_key == "seed":
             self.query_one("#view", ContentSwitcher).current = event.row_key
 
     def on_mount(self) -> None:
