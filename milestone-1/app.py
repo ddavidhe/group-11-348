@@ -34,10 +34,12 @@ seed("sample_data/sample_constructors_data.sql", cursor)
 seed("sample_data/sample_races_data.sql", cursor)
 seed("sample_data/sample_results.sql", cursor)
 
-cursor.execute("SELECT * FROM drivers;")
-for row in cursor.fetchall():
-    print(row)
-
+with open("queries/driver_form.sql", "r") as driver_form:
+    driver_form_template = driver_form.read()
+    driver_form_template = driver_form_template.format(1,22)
+    cursor.execute(driver_form_template)
+    for row in cursor.fetchall():
+        print(row)
 
 conn.commit() # save changes
 cursor.close()
