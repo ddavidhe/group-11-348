@@ -1,0 +1,23 @@
+INSERT INTO drivers (dID, firstName, lastName, driverTag, nationality, age)
+VALUES
+(14, 'Fernando', 'Alonso', 'ALO', 'Spanish', 44),
+(77, 'Valtteri', 'Bottas', 'BOT', 'Finnish', 36),
+(10, 'Pierre', 'Gasly', 'GAS', 'French', 29),
+(99, 'Antonio', 'Giovinazzi', 'GIO', 'Italian', 31),
+(44, 'Lewis', 'Hamilton', 'HAM', 'British', 40),
+(88, 'Robert', 'Kubica', 'KUB', 'Polish', 40),
+(6, 'Nicholas', 'Latifi', 'LAT', 'Canadian', 30),
+(16, 'Charles', 'Leclerc', 'LEC', 'Monegasque', 28),
+(9, 'Nikita', 'Mazepin', 'MAZ', 'Russian', 26),
+(4, 'Lando', 'Norris', 'NOR', 'British', 25),
+(31, 'Esteban', 'Ocon', 'OCO', 'French', 29),
+(11, 'Sergio', 'Pérez', 'PER', 'Mexican', 35),
+(7, 'Kimi', 'Räikkönen', 'RAI', 'Finnish', 46),
+(3, 'Daniel', 'Ricciardo', 'RIC', 'Australian', 36),
+(63, 'George', 'Russell', 'RUS', 'British', 27),
+(55, 'Carlos', 'Sainz', 'SAI', 'Spanish', 31),
+(47, 'Mick', 'Schumacher', 'MSC', 'German', 26),
+(18, 'Lance', 'Stroll', 'STR', 'Canadian', 26),
+(22, 'Yuki', 'Tsunoda', 'TSU', 'Japanese', 25),
+(33, 'Max', 'Verstappen', 'VER', 'Dutch', 28),
+(5, 'Sebastian', 'Vettel', 'VET', 'German', 38);

@@ -10,43 +10,54 @@ CREATE TABLE drivers (
     firstName VARCHAR(100) NOT NULL,
     lastName VARCHAR(100) NOT NULL,
     driverTag VARCHAR(3) NOT NULL,
-    country VARCHAR(100) NOT NULL,
+    nationality VARCHAR(100) NOT NULL,
     age INT NOT NULL
 );
 
 CREATE TABLE constructors (
     cID INT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    start DATE,
-    end DATE
+    name VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE races (
     rID INT PRIMARY KEY,
     trackName VARCHAR(100) NOT NULL,
     trackCountry VARCHAR(100) NOT NULL,
-    raceNumber INT NOT NULL,
+    round INT NOT NULL,
     season INT NOT NULL
 );
 
-CREATE TABLE stints (
+CREATE TABLE results (
     dID INT,
     cID INT,
-    sID INT,
-    startDate DATE NOT NULL,
-    endDate DATE NOT NULL,
-    PRIMARY KEY (dID, cID, sID),
+    rID INT,
+    startPos INT NOT NULL,
+    finishPos INT NOT NULL,
+    PRIMARY KEY (dID, cID, rID),
     FOREIGN KEY (dID) REFERENCES drivers(dID),
-    FOREIGN KEY (cID) REFERENCES constructors(cID)
+    FOREIGN KEY (cID) REFERENCES constructors(cID),
+    FOREIGN KEY (rID) REFERENCES races(rID)
+);
+
+CREATE TABLE driver_telemetries (
+    dID INT,
+    rID INT,
+    lapNumber INT,
+    speed FLOAT NOT NULL,
+    time FLOAT NOT NULL,
+    standing INT NOT NULL,
+    PRIMARY KEY (dID, rID, lapNumber),
+    FOREIGN KEY (dID) REFERENCES drivers(dID),
+    FOREIGN KEY (rID) REFERENCES races(rID)
 );
 
 CREATE TABLE lap_telemetries (
     rID INT,
     lapNumber INT,
-    rainFall BOOL,
-    windSpeed FLOAT,
-    trackTemp FLOAT,
-    airTemp FLOAT,
+    rainFall BOOL NOT NULL,
+    windSpeed FLOAT NOT NULL,
+    trackTemp FLOAT NOT NULL,
+    airTemp FLOAT NOT NULL,
     PRIMARY KEY (rID, lapNumber),
     FOREIGN KEY (rID) REFERENCES races(rID)
 );
