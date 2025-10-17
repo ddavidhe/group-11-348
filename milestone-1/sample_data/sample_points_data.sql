@@ -1,20 +1,22 @@
 INSERT INTO points (season, position, number)
-    VALUES (2025, 1, 25);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 2, 18);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 3, 15);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 4, 12);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 5, 10);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 6, 8);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 7, 6);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 8, 4);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 9, 2);
-INSERT INTO points (season, position, number)
-    VALUES (2025, 10, 1);
+VALUES
+(2021, 1, 25),
+(2021, 2, 18),
+(2021, 3, 16),
+(2021, 4, 12),
+(2021, 5, 10),
+(2021, 6, 8),
+(2021, 7, 6),
+(2021, 8, 4),
+(2021, 9, 2),
+(2021, 10, 1),
+(2021, 11, 0),
+(2021, 12, 0),
+(2021, 13, 0),
+(2021, 14, 0),
+(2021, 15, 0),
+(2021, 16, 0),
+(2021, 17, 0),
+(2021, 18, 0),
+(2021, 19, 0),
+(2021, 20, 0);
