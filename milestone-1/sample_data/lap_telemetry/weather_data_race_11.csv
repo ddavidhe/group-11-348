@@ -1,0 +1,6 @@
+AirTemp,Rainfall,TrackTemp,WindSpeed,rID
+29.1,False,47.0,0.9,11
+27.5,True,35.3,0.3,11
+27.8,False,36.4,0.7,11
+25.8,False,35.9,0.7,11
+26.1,False,36.1,0.5,11

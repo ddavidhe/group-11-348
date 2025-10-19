@@ -33,6 +33,8 @@ seed("sample_data/sample_points_data.sql", cursor)
 seed("sample_data/sample_constructors_data.sql", cursor)
 seed("sample_data/sample_races_data.sql", cursor)
 seed("sample_data/sample_results.sql", cursor)
+seed("sample_data/sample_lap_telemetries.sql", cursor)
+seed("sample_data/sample_driver_telemetries.sql", cursor)
 
 with open("queries/feature-1/driver_form.sql", "r") as driver_form:
     driver_form_template = driver_form.read()
