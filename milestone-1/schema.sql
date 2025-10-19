@@ -27,6 +27,15 @@ CREATE TABLE races (
     season INT NOT NULL
 );
 
+CREATE TABLE laps (
+    lID INT PRIMARY KEY,
+    rID INT,
+    dID INT,
+    lapNumber INT,
+    time INT, -- seconds
+    UNIQUE (rID, dID, lapNumber)
+);
+
 CREATE TABLE results (
     dID INT,
     cID INT,
