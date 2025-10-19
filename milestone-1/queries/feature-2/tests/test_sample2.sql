@@ -1,0 +1,1 @@
+SELECT AVG(time) FROM LAPS WHERE rID = 1 AND dID = 2
