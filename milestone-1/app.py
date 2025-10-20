@@ -9,16 +9,16 @@ conn = mysql.connector.connect(
 
 cursor = conn.cursor()
 
-cursor.execute("DROP DATABASE racing_db;")
-cursor.execute("CREATE DATABASE racing_db;")
-cursor.execute("USE racing_db;")
+_ = cursor.execute("DROP DATABASE racing_db;")
+_ = cursor.execute("CREATE DATABASE racing_db;")
+_ = cursor.execute("USE racing_db;")
 
 # Create the tables
 with open("schema.sql", "r") as schema_file:
     schema_statements = schema_file.read().split(";")
     for statement in schema_statements:
         if statement.strip():
-            cursor.execute(statement)
+            _ = cursor.execute(statement)
 
 
 # Seed data
@@ -42,17 +42,17 @@ seed("sample_data/sample_lap.sql", cursor)
 with open("queries/feature-1/driver_form.sql", "r") as driver_form:
     driver_form_template = driver_form.read()
     driver_form_template = driver_form_template.format(1, 22, 2021)
-    cursor.execute(driver_form_template)
+    _ = cursor.execute(driver_form_template)
     for row in cursor.fetchall():
         print(row)
 
 with open("queries/feature-2/average_lap.sql", "r") as average_lap:
     average_lap_template = average_lap.read()
     average_lap_template = average_lap_template.format(1, 2)
-    cursor.execute(average_lap_template)
+    _ = cursor.execute(average_lap_template)
     for row in cursor.fetchall():
         print(row)
 
-conn.commit()  # save changes
-cursor.close()
+_ = conn.commit()  # save changes
+_ = cursor.close()
 conn.close()
