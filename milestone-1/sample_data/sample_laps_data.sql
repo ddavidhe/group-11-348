@@ -1,4 +1,4 @@
-INSERT INTO laps (dId, rID, lapNumber, standing, time, totalTime, enterPitTime, exitPitTime)
+INSERT INTO laps (dId, rID, lapNumber, time, totalTime, standing, enterPitTime, exitPitTime)
 VALUES
 (44,1, 1.0, 119.538, 2349.686, 2.0, NULL, NULL),
 (44,1, 13.0, 98.924, 3631.298, 2.0, 3629.611, NULL),
