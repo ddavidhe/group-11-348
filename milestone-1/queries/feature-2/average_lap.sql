@@ -1,1 +1,1 @@
-SELECT AVG(time) FROM LAPS WHERE rID = {} AND dID = {}
+SELECT AVG(time) FROM laps WHERE rID = {} AND dID = {}
