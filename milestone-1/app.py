@@ -34,11 +34,11 @@ seed("sample_data/sample_driver_data.sql", cursor)
 seed("sample_data/sample_points_data.sql", cursor)
 seed("sample_data/sample_constructors_data.sql", cursor)
 seed("sample_data/sample_races_data.sql", cursor)
-seed("sample_data/sample_results.sql", cursor)
-seed("sample_data/sample_lap_telemetries.sql", cursor)
-seed("sample_data/sample_driver_telemetries.sql", cursor)
-seed("sample_data/sample_lap.sql", cursor)
+seed("sample_data/sample_results_data.sql", cursor)
+seed("sample_data/sample_laps_data.sql", cursor)
+seed("sample_data/sample_weather_data.sql", cursor)
 
+'''
 with open("queries/feature-1/driver_form.sql", "r") as driver_form:
     driver_form_template = driver_form.read()
     driver_form_template = driver_form_template.format(1, 22, 2021)
@@ -48,8 +48,16 @@ with open("queries/feature-1/driver_form.sql", "r") as driver_form:
 
 with open("queries/feature-2/average_lap.sql", "r") as average_lap:
     average_lap_template = average_lap.read()
-    average_lap_template = average_lap_template.format(1, 2)
+    average_lap_template = average_lap_template.format(20, 14)
     _ = cursor.execute(average_lap_template)
+    for row in cursor.fetchall():
+        print(row)
+'''
+        
+with open("queries/feature-3/pit_delta.sql", "r") as pit_delta:
+    pit_delta_template = pit_delta.read()
+    pit_delta_template = pit_delta_template.format(1,44)
+    _ = cursor.execute(pit_delta_template)
     for row in cursor.fetchall():
         print(row)
 
