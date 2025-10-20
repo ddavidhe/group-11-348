@@ -28,12 +28,27 @@ CREATE TABLE races (
 );
 
 CREATE TABLE laps (
-    lID INT PRIMARY KEY,
     rID INT,
     dID INT,
-    lapNumber INT,
-    time INT, -- seconds
-    UNIQUE (rID, dID, lapNumber)
+    lapNumber INT NOT NULL,
+    standing INT NOT NULL, -- driver's position at the start of the lap
+    time FLOAT NOT NULL, -- time it took for driver to complete this lap (seconds)
+    totalTime FLOAT NOT NULL, -- timestamp of this lap being completed (seconds)
+    enterPitTime FLOAT, -- timestamp of entering pit (seconds)
+    exitPitTime FLOAT, -- timestamp of exiting pit (seconds)
+    PRIMARY KEY (rID, dID, lapNumber),
+    FOREIGN KEY (rID) REFERENCES races(rID),
+    FOREIGN KEY (dID) REFERENCES drivers(dID)
+);
+
+CREATE TABLE weather (
+    rID INT,
+    time FLOAT NOT NULL, -- timestamp of the weather reading (seconds)
+    rainFall BOOL NOT NULL,
+    windSpeed FLOAT NOT NULL,
+    trackTemperature FLOAT NOT NULL,
+    airTemperature FLOAT NOT NULL,
+    FOREIGN KEY (rID) REFERENCES races(rID)
 );
 
 CREATE TABLE results (
