@@ -33,7 +33,7 @@ CREATE TABLE laps (
     lapNumber INT NOT NULL,
     standing INT NOT NULL, -- driver's position at the start of the lap
     time FLOAT NOT NULL, -- time it took for driver to complete this lap (seconds)
-    totalTime FLOAT NOT NULL, -- timestamp of this lap being completed (seconds)
+    finishTime FLOAT NOT NULL, -- timestamp of this lap being completed (seconds)
     enterPitTime FLOAT, -- timestamp of entering pit (seconds)
     exitPitTime FLOAT, -- timestamp of exiting pit (seconds)
     PRIMARY KEY (rID, dID, lapNumber),
