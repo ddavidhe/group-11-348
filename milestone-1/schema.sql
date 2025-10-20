@@ -47,26 +47,3 @@ CREATE TABLE results (
     FOREIGN KEY (cID) REFERENCES constructors(cID),
     FOREIGN KEY (rID) REFERENCES races(rID)
 );
-
-CREATE TABLE driver_telemetries (
-    dID INT,
-    rID INT,
-    lapNumber INT,
-    speed FLOAT NOT NULL,
-    time FLOAT NOT NULL,
-    standing INT NOT NULL,
-    enterPitTime FLOAT,
-    exitPitTime FLOAT,
-    PRIMARY KEY (dID, rID, lapNumber),
-    FOREIGN KEY (dID) REFERENCES drivers(dID),
-    FOREIGN KEY (rID) REFERENCES races(rID)
-);
-
-CREATE TABLE lap_telemetries (
-    rID INT,
-    rainFall BOOL NOT NULL,
-    windSpeed FLOAT NOT NULL,
-    trackTemp FLOAT NOT NULL,
-    airTemp FLOAT NOT NULL,
-    FOREIGN KEY (rID) REFERENCES races(rID)
-);
