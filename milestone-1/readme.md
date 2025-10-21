@@ -36,3 +36,12 @@ python3 app.py
 ```
 
 Currently the app connects the user to their local MySQL database, creates and populates a test table, and reads all entries from it.
+
+## 5. Terminal User Interface
+Interact with our various features by engaging the TUI.
+
+```bash
+python3 TUI.py
+```
+
+This will display an interface in your terminal with a car graphic and various features. Be sure to seed the database before attempting to use any features.
