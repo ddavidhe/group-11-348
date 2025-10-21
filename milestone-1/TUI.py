@@ -99,7 +99,9 @@ class F1App(App):
         seed("sample_data/sample_points_data.sql", self.cursor)
         seed("sample_data/sample_constructors_data.sql", self.cursor)
         seed("sample_data/sample_races_data.sql", self.cursor)
-        seed("sample_data/sample_results.sql", self.cursor)
+        seed("sample_data/sample_results_data.sql", self.cursor)
+        seed("sample_data/sample_laps_data.sql", self.cursor)
+        seed("sample_data/sample_weather_data.sql", self.cursor)
         self.conn.commit()
 
     def _db_query_feature1(self, s, e, season):
@@ -111,6 +113,30 @@ class F1App(App):
             table.add_columns("First Name", "Last Name", "CODE", "Points")
             for row in self.cursor.fetchall():
                 table.add_row(row[0], row[1], row[2], row[3])
+            table.cursor_type = "row"
+            table.zebra_stripes = True
+    
+    def _db_query_feature2(self, rID, dID):
+        with open("queries/feature-2/average_lap.sql", "r") as average_lap:
+            average_lap_template = average_lap.read()
+            average_lap_template = average_lap_template.format(rID, dID)
+            self.cursor.execute(average_lap_template)
+            table = self.query_one("#feature2-table", DataTable)
+            table.add_columns("Average Lap Speed")
+            for row in self.cursor.fetchall():
+                table.add_row(row[0])
+            table.cursor_type = "row"
+            table.zebra_stripes = True
+
+    def _db_query_feature3(self, rID, dID):
+        with open("queries/feature-3/pit_delta.sql", "r") as pit_delta:
+            pit_delta_template = pit_delta.read()
+            pit_delta_template = pit_delta_template.format(rID, dID)
+            self.cursor.execute(pit_delta_template)
+            table = self.query_one("#feature3-table", DataTable)
+            table.add_columns("Pit Stop Delta Times")
+            for row in self.cursor.fetchall():
+                table.add_row(row[0])
             table.cursor_type = "row"
             table.zebra_stripes = True
 
@@ -133,6 +159,24 @@ class F1App(App):
                         yield Button("Go", id="feature1-go")
                     yield DataTable(id="feature1-table")
 
+            with VerticalScroll(id='feature2'):
+                with ContentSwitcher(id='feature2-switcher', initial="feature2-interface"):
+                    with Container(id="feature2-interface"):
+                        yield Static("Please input a raceID and a driverID")
+                        yield Input(placeholder="Race ID...", id="feature2-raceid")
+                        yield Input(placeholder="Driver ID...", id="feature2-driverid")
+                        yield Button("Go", id="feature2-go")
+                    yield DataTable(id="feature2-table")
+            
+            with VerticalScroll(id='feature3'):
+                with ContentSwitcher(id='feature3-switcher', initial="feature3-interface"):
+                    with Container(id="feature3-interface"):
+                        yield Static("Please input a raceID and a driverID")
+                        yield Input(placeholder="Race ID...", id="feature3-raceid")
+                        yield Input(placeholder="Driver ID...", id="feature3-driverid")
+                        yield Button("Go", id="feature3-go")
+                    yield DataTable(id="feature3-table")
+
         yield RichLog()
 
         yield Static("Press \[Enter] to select a feature, press \[Escape] to go back, and press \[q] to quit.", id="helper-text")
@@ -148,6 +192,18 @@ class F1App(App):
             self._db_query_feature1(s, e, season)
             self.query_one("#feature1-switcher", ContentSwitcher).current = "feature1-table"
             self.query_one("#feature1-table", DataTable).focus()
+        if button_id == "feature2-go":
+            rID = self.query_one("#feature2-raceid", Input).value
+            dID = self.query_one("#feature2-driverid", Input).value
+            self._db_query_feature2(rID, dID)
+            self.query_one("#feature2-switcher", ContentSwitcher).current = "feature2-table"
+            self.query_one("#feature2-table", DataTable).focus()
+        if button_id == "feature3-go":
+            rID = self.query_one("#feature3-raceid", Input).value
+            dID = self.query_one("#feature3-driverid", Input).value
+            self._db_query_feature3(rID, dID)
+            self.query_one("#feature3-switcher", ContentSwitcher).current = "feature3-table"
+            self.query_one("#feature3-table", DataTable).focus()
 
     def action_back(self) -> None:
         self.query_one("#view", ContentSwitcher).current = "feature-table"
@@ -156,7 +212,7 @@ class F1App(App):
     @on(DataTable.RowSelected)
     def on_data_table_cell_selected(self, event: DataTable.RowSelected) -> None:
         self.query_one(RichLog).write(event.row_key)
-        if event.row_key == "feature1" or event.row_key == "seed":
+        if event.row_key == "seed" or event.row_key == "feature1" or event.row_key == "feature2" or event.row_key == "feature3":
             self.query_one("#view", ContentSwitcher).current = event.row_key
 
     def on_mount(self) -> None:
@@ -166,8 +222,8 @@ class F1App(App):
         table.add_column( "Description")
         table.add_row( "Seed", "Seeds the database instance", key='seed')
         table.add_row("Driver Form", "Explore the forms of the drivers for a given timeframe of a season.", key='feature1')
-        table.add_row("Feature 2", "Feature 2.", key='feature2')
-        table.add_row("Feature 3", "Feature 3.", key='feature3')
+        table.add_row("Average Lap Time", "Find the average time it takes a driver to complete a lap for a given race.", key='feature2')
+        table.add_row("Pit Delta", "Find the difference between a driver's first lap and pit lap times for a given race.", key='feature3')
         table.add_row("Feature 4", "Feature 4.", key='feature4')
         table.add_row("Feature 5", "Feature 5.", key='feature5')
 
