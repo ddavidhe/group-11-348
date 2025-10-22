@@ -4,14 +4,29 @@ WITH first_lap AS (
         WHERE lapNumber = 1
      ),
 
-    first_pit AS (
-        SELECT dID, rID, time AS first_pit_time
+    pits AS (
+        SELECT dID, rID, lapNumber, time AS pit_times
         FROM laps
         WHERE enterPitTime IS NOT NULL
-        ORDER BY enterPitTime ASC
     )
 
-SELECT (fl.first_lap_time - fp.first_pit_time) AS pit_delta FROM first_lap fl
-JOIN first_pit fp ON fl.dID = fp.dID AND fl.rID = fp.rID 
+SELECT p.lapNumber as pit_lap_number,
+fl.first_lap_time,
+p.pit_times,
+(fl.first_lap_time - p.pit_times) AS pit_delta
+FROM first_lap fl
+JOIN pits p ON fl.dID = p.dID AND fl.rID = p.rID 
 WHERE fl.rID = 1 AND fl.dID = 44
-ORDER BY pit_delta ASC
+
+UNION ALL
+
+SELECT 
+    1 AS pit_lap_number,
+    fl.first_lap_time,
+    NULL AS pit_time,
+    NULL AS pit_delta
+FROM first_lap fl
+WHERE fl.rID = 1 
+  AND fl.dID = 44
+
+ORDER BY pit_lap_number ASC;
