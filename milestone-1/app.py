@@ -38,7 +38,6 @@ seed("sample_data/sample_results_data.sql", cursor)
 seed("sample_data/sample_laps_data.sql", cursor)
 seed("sample_data/sample_weather_data.sql", cursor)
 
-'''
 with open("queries/feature-1/driver_form.sql", "r") as driver_form:
     driver_form_template = driver_form.read()
     driver_form_template = driver_form_template.format(1, 22, 2021)
@@ -52,12 +51,18 @@ with open("queries/feature-2/average_lap.sql", "r") as average_lap:
     _ = cursor.execute(average_lap_template)
     for row in cursor.fetchall():
         print(row)
-'''
         
 with open("queries/feature-3/pit_delta.sql", "r") as pit_delta:
     pit_delta_template = pit_delta.read()
     pit_delta_template = pit_delta_template.format(1,44)
     _ = cursor.execute(pit_delta_template)
+    for row in cursor.fetchall():
+        print(row)
+
+with open("queries/feature-4/lap_info.sql", "r") as lap_info:
+    lap_info_template = lap_info.read()
+    lap_info_template = lap_info_template.format(rID = 2, lapNumber = 63)
+    _ = cursor.execute(lap_info_template)
     for row in cursor.fetchall():
         print(row)
 
