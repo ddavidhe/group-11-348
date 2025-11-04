@@ -1,8 +1,8 @@
-# Milestone 1
+# Milestone 2
 
 ## 1. Download Dependencies and MySQL
 
-Ensure you are in the `milestone-1` directory before running these commands
+Ensure you are in the `milestone-2` directory before running these commands
 
 ```bash
 source ../.venv/bin/activate
