@@ -11,6 +11,8 @@ The three tests used in gauging performance are in `testing.ipynb`, each being o
 There are 4 optimizations that were used to test. Dataset 0 represents no optimization, dataset 1 represents indexes on the `season` attribute on both `races` and `points`, dataset 2 represents indices on the (finishing) positions on `results` and `points`, dataset 3 is both optimizations 1 and 2, and lastly, dataset 4 is optimizations 1 and 2, except the two indices on `points` were merged to be a multicolumn index.
 
 Each dataset has about 500 points.
+
+To evaluate the performance, simply run `testing.ipynb`.
 #### Test 1
 Test 1 represents the query with 2021 as the season, 1 as the starting round, and 11 as the ending round. It represents the workload of querying roughly half a season.
 ![img.png](assets/test1cdf.png)
