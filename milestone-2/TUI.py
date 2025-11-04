@@ -1,5 +1,6 @@
 from turtledemo.penrose import start
-
+import numpy as np
+import pandas as pd
 import mysql.connector
 from textual import on
 from textual.app import App, ComposeResult
@@ -46,7 +47,13 @@ class F1App(App):
             color: white;
         }
         
-        #seed {
+        #seedsample {
+            padding: 1;
+            align: center middle;
+            height: auto;
+        }
+        
+        #seedprod {
             padding: 1;
             align: center middle;
             height: auto;
@@ -75,7 +82,7 @@ class F1App(App):
         self.cursor.execute("CREATE DATABASE IF NOT EXISTS racing_db;")
         self.cursor.execute("USE racing_db;")
 
-    def _db_seed(self):
+    def _db_seed_sample(self):
         def seed(n, c):
             with open(n, "r") as data_file:
                 data_statements = data_file.read().split(';')
@@ -83,7 +90,7 @@ class F1App(App):
                     if ds.strip():
                         c.execute(ds)
 
-        self.query_one(RichLog).write("Seeding database")
+        self.query_one(RichLog).write("Seeding sample database.")
 
         self.cursor.execute("DROP DATABASE racing_db;")
         self.cursor.execute("CREATE DATABASE racing_db;")
@@ -102,6 +109,69 @@ class F1App(App):
         seed("sample_data/sample_results_data.sql", self.cursor)
         seed("sample_data/sample_laps_data.sql", self.cursor)
         seed("sample_data/sample_weather_data.sql", self.cursor)
+        self.conn.commit()
+
+    def _db_seed_prod(self):
+        self.query_one(RichLog).write("Seeding production database.")
+
+        self.cursor.execute("DROP DATABASE racing_db;")
+        self.cursor.execute("CREATE DATABASE racing_db;")
+        self.cursor.execute("USE racing_db;")
+
+        with open("schema.sql", "r") as schema_file:
+            schema_statements = schema_file.read().split(';')
+            for statement in schema_statements:
+                if statement.strip():
+                    self.cursor.execute(statement)
+
+        PATH = 'production_data/output_csv/'
+
+        # Drivers
+        driver_string = """
+            INSERT INTO drivers (dID, firstName, lastName, driverTag, nationality, age) 
+                VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        driver_df = pd.read_csv(PATH + 'drivers.csv').replace({np.nan: None})
+        driver_data = driver_df.to_dict(orient='records')
+        driver_values = [list(driver.values()) for driver in driver_data]
+
+        # Constructors
+        constructor_string = "INSERT INTO constructors (cID, name) VALUES"
+        constructor_df = pd.read_csv(PATH + 'constructor.csv')
+        constructor_data = constructor_df.to_dict(orient='records')
+        for constructor in constructor_data:
+            constructor_string += f" ({constructor['cID']}, \'{constructor['name']}\'),"
+        constructor_string = constructor_string[:-1] + ";"
+
+        # Races
+        race_string = "INSERT INTO races (rID, trackName, trackCountry, round, season) VALUES"
+        race_df = pd.read_csv(PATH + 'race.csv')
+        race_data = race_df.to_dict(orient='records')
+        for race in race_data:
+            race_string += f" ({race['cID']}, \'{race['name']}\', \'{race['country']}\', {race['round']}, {race['season']}),"
+        race_string = race_string[:-1] + ";"
+
+        # Results
+        result_string = "INSERT INTO results (dID, cID, rID, startPos, finishPos) VALUES"
+        result_df = pd.read_csv(PATH + 'result.csv')
+        result_data = result_df.to_dict(orient='records')
+        for result in result_data:
+            result_string += f" ({result['dID']}, {result['cID']}, {result['rID']}, {result['startPos']}, {result['finishPos']}),"
+        result_string = result_string[:-1] + ";"
+
+        # Points
+        point_string = "INSERT INTO points (season, position, number) VALUES"
+        point_df = pd.read_csv(PATH + 'points.csv')
+        point_data = point_df.to_dict(orient='records')
+        for point in point_data:
+            point_string += f" ({point['season']}, {point['position']}, {point['points']}),"
+        point_string = point_string[:-1] + ";"
+
+        self.cursor.executemany(driver_string, driver_values)
+        self.cursor.execute(constructor_string)
+        self.cursor.execute(race_string)
+        self.cursor.execute(result_string)
+        self.cursor.execute(point_string)
         self.conn.commit()
 
     def _db_query_feature1(self, s, e, season):
@@ -146,8 +216,11 @@ class F1App(App):
         with ContentSwitcher(id='view', initial="feature-table"):
             yield DataTable(id="feature-table")
 
-            with VerticalScroll(id='seed'):
-                yield Button("Seed the database", id="seed-btn")
+            with VerticalScroll(id='seedsample'):
+                yield Button("Seed the database with sample data.", id="seed-sample-btn")
+
+            with VerticalScroll(id='seedprod'):
+                yield Button("Seed the database with production data.", id="seed-prod-btn")
 
             with VerticalScroll(id='feature1'):
                 with ContentSwitcher(id='feature1-switcher', initial="feature1-interface"):
@@ -183,8 +256,10 @@ class F1App(App):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
-        if button_id == "seed-btn":
-            self._db_seed()
+        if button_id == "seed-sample-btn":
+            self._db_seed_sample()
+        if button_id == "seed-prod-btn":
+            self._db_seed_prod()
         if button_id == "feature1-go":
             season = self.query_one("#feature1-season", Input).value
             s = self.query_one("#feature1-start", Input).value
@@ -212,7 +287,8 @@ class F1App(App):
     @on(DataTable.RowSelected)
     def on_data_table_cell_selected(self, event: DataTable.RowSelected) -> None:
         self.query_one(RichLog).write(event.row_key)
-        if event.row_key == "seed" or event.row_key == "feature1" or event.row_key == "feature2" or event.row_key == "feature3":
+        if (event.row_key == "seedsample" or event.row_key == "seedprod" or
+                event.row_key == "feature1" or event.row_key == "feature2" or event.row_key == "feature3"):
             self.query_one("#view", ContentSwitcher).current = event.row_key
 
     def on_mount(self) -> None:
@@ -220,7 +296,8 @@ class F1App(App):
         table.focus()
         table.add_column("Feature")
         table.add_column( "Description")
-        table.add_row( "Seed", "Seeds the database instance", key='seed')
+        table.add_row( "Seed Sample Data", "Seeds the database instance with sample data.", key='seedsample')
+        table.add_row("Seed Production Data", "Seeds the database instance with production data.", key='seedprod')
         table.add_row("Driver Form", "Explore the forms of the drivers for a given timeframe of a season.", key='feature1')
         table.add_row("Average Lap Time", "Find the average time it takes a driver to complete a lap for a given race.", key='feature2')
         table.add_row("Pit Delta", "Find the difference between a driver's first lap and pit lap times for a given race.", key='feature3')
