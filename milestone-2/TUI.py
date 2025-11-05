@@ -5,7 +5,7 @@ import mysql.connector
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Container, VerticalScroll
+from textual.containers import Horizontal, Container, VerticalScroll, HorizontalScroll
 from textual.widgets import Button, ContentSwitcher, Static, DataTable, RichLog, Input
 
 class F1App(App):
@@ -62,14 +62,46 @@ class F1App(App):
         #feature1 {
             padding: 1;
             align: center middle;
+            content-align: center middle;
             height: auto;
+        }
+        
+        #feature1-interface Static {
+            text-align: center;
         }
         
         #feature1-interface {
             padding: 1;
             align: center middle;
+            content-align: center middle;
             height: auto;
         }
+        
+        #feature1-interface Input {
+            width: 50%;
+            text-align: center;
+        }
+            
+        #feature1-interface Button {
+            width: auto;
+        }
+    
+        #feature1-table {
+            width: auto;
+            margin-top: 1;
+            margin-bottom: 1;
+        }
+        
+        #unseeded-error {
+            padding: 1;
+            align: center middle;
+            height: auto;
+        }
+        
+        Horizontal {
+            align: center middle;
+            height: auto;
+        } 
     """
     def __init__(self):
         super().__init__()
@@ -81,6 +113,7 @@ class F1App(App):
         self.cursor = self.conn.cursor()
         self.cursor.execute("CREATE DATABASE IF NOT EXISTS racing_db;")
         self.cursor.execute("USE racing_db;")
+        self.seeded = False
 
     def _db_seed_sample(self):
         def seed(n, c):
@@ -90,7 +123,7 @@ class F1App(App):
                     if ds.strip():
                         c.execute(ds)
 
-        self.query_one(RichLog).write("Seeding sample database.")
+        #self.query_one(RichLog).write("Seeding sample database.")
 
         self.cursor.execute("DROP DATABASE racing_db;")
         self.cursor.execute("CREATE DATABASE racing_db;")
@@ -110,9 +143,10 @@ class F1App(App):
         seed("sample_data/sample_laps_data.sql", self.cursor)
         seed("sample_data/sample_weather_data.sql", self.cursor)
         self.conn.commit()
+        self.seeded = True
 
     def _db_seed_prod(self):
-        self.query_one(RichLog).write("Seeding production database.")
+        #self.query_one(RichLog).write("Seeding production database.")
 
         self.cursor.execute("DROP DATABASE racing_db;")
         self.cursor.execute("CREATE DATABASE racing_db;")
@@ -173,6 +207,11 @@ class F1App(App):
         self.cursor.execute(result_string)
         self.cursor.execute(point_string)
         self.conn.commit()
+        self.seeded = True
+
+    def _count_rounds(self, season):
+        self.cursor.execute(f'SELECT COUNT(*) FROM races WHERE season = {season}')
+        return self.cursor.fetchone()[0]
 
     def _db_query_feature1(self, s, e, season):
         with open("queries/feature-1/driver_form.sql", "r") as driver_form:
@@ -185,6 +224,14 @@ class F1App(App):
                 table.add_row(row[0], row[1], row[2], row[3])
             table.cursor_type = "row"
             table.zebra_stripes = True
+
+    def _reset_feature1(self):
+        self.query_one("#feature1-switcher", ContentSwitcher).current = "feature1-interface"
+        table = self.query_one("#feature1-table", DataTable)
+        self.query_one("#feature1-season", Input).value = ""
+        self.query_one("#feature1-start", Input).value = ""
+        self.query_one("#feature1-end", Input).value = ""
+        table.clear(columns=True)
     
     def _db_query_feature2(self, rID, dID):
         with open("queries/feature-2/average_lap.sql", "r") as average_lap:
@@ -222,15 +269,23 @@ class F1App(App):
             with VerticalScroll(id='seedprod'):
                 yield Button("Seed the database with production data.", id="seed-prod-btn")
 
+            with Container(id="unseeded-error"):
+                yield Static("Please seed the database first.")
+
             with VerticalScroll(id='feature1'):
                 with ContentSwitcher(id='feature1-switcher', initial="feature1-interface"):
                     with Container(id="feature1-interface"):
-                        yield Static("Please input a season, starting round, and an ending round")
-                        yield Input(placeholder="Season...", id="feature1-season")
-                        yield Input(placeholder="Start...", id="feature1-start")
-                        yield Input(placeholder="End...", id="feature1-end")
-                        yield Button("Go", id="feature1-go")
-                    yield DataTable(id="feature1-table")
+                        yield Static("Please input a season, starting round, and an ending round.")
+                        with Horizontal():
+                            yield Input(placeholder="Season...", id="feature1-season", type="integer")
+                        with Horizontal():
+                            yield Input(placeholder="Start...", id="feature1-start", type="integer")
+                        with Horizontal():
+                            yield Input(placeholder="End...", id="feature1-end", type="integer")
+                        with Horizontal():
+                            yield Button("Go", id="feature1-go")
+                    with Horizontal(id="feature1-table-container"):
+                        yield DataTable(id="feature1-table")
 
             with VerticalScroll(id='feature2'):
                 with ContentSwitcher(id='feature2-switcher', initial="feature2-interface"):
@@ -250,7 +305,7 @@ class F1App(App):
                         yield Button("Go", id="feature3-go")
                     yield DataTable(id="feature3-table")
 
-        yield RichLog()
+        #yield RichLog()
 
         yield Static("Press \[Enter] to select a feature, press \[Escape] to go back, and press \[q] to quit.", id="helper-text")
 
@@ -264,9 +319,20 @@ class F1App(App):
             season = self.query_one("#feature1-season", Input).value
             s = self.query_one("#feature1-start", Input).value
             e = self.query_one("#feature1-end", Input).value
-            self._db_query_feature1(s, e, season)
-            self.query_one("#feature1-switcher", ContentSwitcher).current = "feature1-table"
-            self.query_one("#feature1-table", DataTable).focus()
+            if season == "" or s == "" or e == "":
+                self.notify("Please fill out all fields.")
+                return
+            rounds = self._count_rounds(season)
+            if int(season) < 1989 or int(season) > 2024:
+                self.notify("Please input a season between 1989 and 2024 (inclusive).")
+            elif int(s) < 1 or int(s) > int(e):
+                self.notify("Please input a valid starting round.")
+            elif int(e) < 1 or int(e) > int(rounds):
+                self.notify(f'Please input a valid ending round. There are {rounds} rounds in the {season} season.')
+            else:
+                self._db_query_feature1(s, e, season)
+                self.query_one("#feature1-switcher", ContentSwitcher).current = "feature1-table-container"
+                self.query_one("#feature1-table", DataTable).focus()
         if button_id == "feature2-go":
             rID = self.query_one("#feature2-raceid", Input).value
             dID = self.query_one("#feature2-driverid", Input).value
@@ -281,15 +347,20 @@ class F1App(App):
             self.query_one("#feature3-table", DataTable).focus()
 
     def action_back(self) -> None:
+        self._reset_feature1()
         self.query_one("#view", ContentSwitcher).current = "feature-table"
         self.query_one("#feature-table", DataTable).focus()
 
     @on(DataTable.RowSelected)
     def on_data_table_cell_selected(self, event: DataTable.RowSelected) -> None:
-        self.query_one(RichLog).write(event.row_key)
-        if (event.row_key == "seedsample" or event.row_key == "seedprod" or
-                event.row_key == "feature1" or event.row_key == "feature2" or event.row_key == "feature3"):
+        #self.query_one(RichLog).write(event.row_key)
+        if (event.row_key == "seedsample" or event.row_key == "seedprod"):
             self.query_one("#view", ContentSwitcher).current = event.row_key
+        elif (event.row_key == "feature1" or event.row_key == "feature2" or event.row_key == "feature3"):
+            if not self.seeded:
+                self.query_one("#view", ContentSwitcher).current = 'unseeded-error'
+            else:
+                self.query_one("#view", ContentSwitcher).current = event.row_key
 
     def on_mount(self) -> None:
         table = self.query_one("#feature-table", DataTable)
