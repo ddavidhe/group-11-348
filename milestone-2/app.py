@@ -1,11 +1,7 @@
 import mysql.connector
 
 # Replace 'root' and 'your_password' with your MySQL root username and password
-conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="password"
-)
+conn = mysql.connector.connect(host="localhost", user="root", password="password")
 
 cursor = conn.cursor()
 
