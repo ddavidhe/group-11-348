@@ -15,5 +15,5 @@ ON laps.rID = finishPositions.rID
 JOIN drivers
 ON laps.dID = drivers.dID
 WHERE laps.rID = 1116
-  AND laps.lapNumber = 10
+  AND laps.lapNumber = 1
 ORDER BY finishPos, startPos;

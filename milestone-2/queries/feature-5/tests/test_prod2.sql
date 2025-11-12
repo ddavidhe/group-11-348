@@ -7,7 +7,7 @@ AND finishPos > (
     SELECT finishPos FROM (
         SELECT finishPos
         FROM results
-        WHERE dID = 830 AND cID = 131 AND rID = 1100
+        WHERE dID = 174 AND cID = 38 AND rID = 1100
     ) AS dqpos
 );
 
