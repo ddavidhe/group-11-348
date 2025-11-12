@@ -1,0 +1,29 @@
+Feature-4 Timing Results
+==================================================
+Test parameters: rID=1116, lapNumber=10
+Iterations: 100
+
+Optimization 0:
+  Median latency: 0.000583s
+  99th percentile latency: 0.002295s
+
+Optimization 1:
+  Median latency: 0.000518s
+  99th percentile latency: 0.000772s
+
+Optimization 2:
+  Median latency: 0.000510s
+  99th percentile latency: 0.000859s
+
+Optimization 3:
+  Median latency: 0.000511s
+  99th percentile latency: 0.001130s
+
+Optimization 4:
+  Median latency: 0.000563s
+  99th percentile latency: 0.001017s
+
+Optimization 5:
+  Median latency: 0.000529s
+  99th percentile latency: 0.004027s
+
