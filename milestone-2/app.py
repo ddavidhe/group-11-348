@@ -1,11 +1,7 @@
 import mysql.connector
 
 # Replace 'root' and 'your_password' with your MySQL root username and password
-conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="password"
-)
+conn = mysql.connector.connect(host="localhost", user="root", password="password")
 
 cursor = conn.cursor()
 
@@ -51,21 +47,52 @@ with open("queries/feature-2/average_lap.sql", "r") as average_lap:
     _ = cursor.execute(average_lap_template)
     for row in cursor.fetchall():
         print(row)
-        
+
 with open("queries/feature-3/pit_delta.sql", "r") as pit_delta:
     pit_delta_template = pit_delta.read()
-    pit_delta_template = pit_delta_template.format(1,44)
+    pit_delta_template = pit_delta_template.format(1, 44)
     _ = cursor.execute(pit_delta_template)
     for row in cursor.fetchall():
         print(row)
 
 with open("queries/feature-4/lap_info.sql", "r") as lap_info:
     lap_info_template = lap_info.read()
-    lap_info_template = lap_info_template.format(rID = 2, lapNumber = 63)
+    lap_info_template = lap_info_template.format(rID=2, lapNumber=63)
     _ = cursor.execute(lap_info_template)
     for row in cursor.fetchall():
         print(row)
 
 _ = conn.commit()  # save changes
 _ = cursor.close()
+conn.close()
+
+conn = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="password",
+    database="racing_db",
+    use_pure=True,  # required for multi=True
+)
+
+cur = conn.cursor(buffered=True)
+
+with open("queries/feature-5/disqualify.sql", "r") as f:
+    dq_dID, dq_cID, dq_rID = 44, 8, 1
+    sql = f.read().format(dID=dq_dID, cID=dq_cID, rID=dq_rID)
+
+for statement in sql.split(";"):
+    stmt = statement.strip()
+    if stmt:
+        _ = cur.execute(stmt)
+
+# Print updated standings for the race
+_ = cur.execute(
+    "SELECT dID, cID, rID, finishPos FROM results WHERE rID = %s ORDER BY finishPos ASC",
+    (dq_rID,),
+)
+for row in cur.fetchall():
+    print(row)
+
+conn.commit()
+cur.close()
 conn.close()
