@@ -201,11 +201,31 @@ class F1App(App):
             point_string += f" ({point['season']}, {point['position']}, {point['points']}),"
         point_string = point_string[:-1] + ";"
 
+        # Weather
+        weather_df = pd.read_csv(PATH + 'weather.csv')
+        formatted_weather = ",\n".join(
+            f"({row['rID']}, {row['Time']}, {row['Rainfall']}, {row['WindSpeed']}, {row['TrackTemp']}, {row['AirTemp']})"
+            for _, row in weather_df.iterrows()
+        )
+        print(formatted_weather)
+        weather_string = "INSERT INTO weather (rID, time, rainFall, windSpeed, trackTemperature, airTemperature) VALUES " + formatted_weather
+
+        # Laps
+        laps_df = pd.read_csv(PATH + 'laps.csv')
+        laps_df =laps_df.fillna('NULL')
+        formatted_laps = ",\n".join(
+            f"({row['dID']},{row['rID']}, {row['LapNumber']}, {row['Speed']}, {row['Time']}, {row['Position']}, {row['PitInTime']}, {row['PitOutTime']})"
+            for _, row in laps_df.iterrows()
+        )
+        laps_string = "INSERT INTO laps (dId, rID, lapNumber, time, finishTime, standing, enterPitTime, exitPitTime) VALUES " + formatted_laps
+
         self.cursor.executemany(driver_string, driver_values)
         self.cursor.execute(constructor_string)
         self.cursor.execute(race_string)
         self.cursor.execute(result_string)
         self.cursor.execute(point_string)
+        self.cursor.execute(weather_string)
+        self.cursor.execute(laps_string)
         self.conn.commit()
         self.seeded = True
 
