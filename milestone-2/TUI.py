@@ -136,7 +136,7 @@ class F1App(App):
     def __init__(self):
         super().__init__()
         self.conn = mysql.connector.connect(
-            host="localhost", user="root", password="ultraboost"
+            host="localhost", user="root", password="password"
         )
         self.cursor = self.conn.cursor()
         self.cursor.execute("CREATE DATABASE IF NOT EXISTS racing_db;")
