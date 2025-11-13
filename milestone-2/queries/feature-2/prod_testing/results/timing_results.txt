@@ -1,29 +1,29 @@
 Feature-2 Timing Results
 ==================================================
-Test parameters: rID=1116, dID=844
+Test parameters: rID=1116, dID=156
 Iterations: 100
 
 Optimization 0:
-  Median latency: 0.000468s
-  99th percentile latency: 0.000955s
+  Median latency: 0.000588s
+  99th percentile latency: 0.001155s
 
 Optimization 1:
-  Median latency: 0.000325s
-  99th percentile latency: 0.003826s
+  Median latency: 0.000435s
+  99th percentile latency: 0.002061s
 
 Optimization 2:
-  Median latency: 0.000441s
-  99th percentile latency: 0.002160s
+  Median latency: 0.000404s
+  99th percentile latency: 0.010482s
 
 Optimization 3:
-  Median latency: 0.000454s
-  99th percentile latency: 0.002614s
+  Median latency: 0.000431s
+  99th percentile latency: 0.030329s
 
 Optimization 4:
-  Median latency: 0.000430s
-  99th percentile latency: 0.006867s
+  Median latency: 0.000436s
+  99th percentile latency: 0.006136s
 
 Optimization 5:
-  Median latency: 0.000422s
-  99th percentile latency: 0.002820s
+  Median latency: 0.000460s
+  99th percentile latency: 0.005690s
 

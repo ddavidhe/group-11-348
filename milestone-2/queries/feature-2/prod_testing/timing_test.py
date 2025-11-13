@@ -29,7 +29,7 @@ def reset_database(cursor, conn):
             VALUES (%s, %s, %s, %s, %s, %s)
     """
     driver_df = pd.read_csv(PATH + "drivers.csv").replace({np.nan: None})
-    driver_df = driver_df.drop_duplicates(subset=['dID'], keep='first')
+    driver_df = driver_df.drop_duplicates(subset=["dID"], keep="first")
     driver_data = driver_df.to_dict(orient="records")
     driver_values = [list(driver.values()) for driver in driver_data]
 
@@ -124,7 +124,7 @@ def main():
     conn = mysql.connector.connect(host="localhost", user="root", password="ultraboost")
     cursor = conn.cursor()
 
-    test_params = {"rID": 1116, "dID": 844}
+    test_params = {"rID": 1116, "dID": 156}
 
     iterations = 100
     results = {}
