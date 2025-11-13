@@ -1,12 +1,10 @@
-from turtledemo.penrose import start
-
 import mysql.connector
 import numpy as np
 import pandas as pd
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Horizontal, HorizontalScroll, VerticalScroll
+from textual.containers import Center, Container, VerticalScroll
 from textual.widgets import Button, ContentSwitcher, DataTable, Input, RichLog, Static
 
 
@@ -61,73 +59,45 @@ class F1App(App):
             height: auto;
         }
 
-        #feature1 {
+        .feature-scroll {
             padding: 1;
             align: center middle;
             content-align: center middle;
             height: auto;
         }
 
-        #feature1-interface Static {
+        .feature-input Static {
             text-align: center;
         }
 
-        #feature1-interface {
+        .feature-input {
             padding: 1;
             align: center middle;
             content-align: center middle;
             height: auto;
         }
 
-        #feature1-interface Input {
+        .feature-input Input {
             width: 50%;
             text-align: center;
         }
 
-        #feature1-interface Button {
+        .feature-input Button {
             width: auto;
         }
 
-        #feature1-table {
+        .feature-output-table {
             width: auto;
             margin-top: 1;
             margin-bottom: 1;
         }
 
-        #feature5 {
-            padding: 1;
-            align: center middle;
-            content-align: center middle;
-            height: auto;
-        }
-
-        #feature5-interface Static {
-            text-align: center;
-        }
-
-        #feature5-interface {
-            padding: 1;
-            align: center middle;
-            content-align: center middle;
-            height: auto;
-        }
-
-        #feature5-interface Input {
-            width: 50%;
-            text-align: center;
-        }
-
-        #feature5-interface Button {
+        .status-message {
             width: auto;
         }
 
         #unseeded-error {
             padding: 1;
-            align: center middle;
-            height: auto;
-        }
-
-        Horizontal {
             align: center middle;
             height: auto;
         }
@@ -280,8 +250,7 @@ class F1App(App):
             self.cursor.execute(driver_form_template)
             table = self.query_one("#feature1-table", DataTable)
             table.add_columns("First Name", "Last Name", "CODE", "Points")
-            for row in self.cursor.fetchall():
-                table.add_row(row[0], row[1], row[2], row[3])
+            table.add_rows(self.cursor.fetchall())
             table.cursor_type = "row"
             table.zebra_stripes = True
 
@@ -302,22 +271,58 @@ class F1App(App):
             self.cursor.execute(average_lap_template)
             table = self.query_one("#feature2-table", DataTable)
             table.add_columns("Average Lap Speed")
-            for row in self.cursor.fetchall():
-                table.add_row(row[0])
+            table.add_rows(self.cursor.fetchall())
             table.cursor_type = "row"
             table.zebra_stripes = True
+
+    def _reset_feature2(self):
+        self.query_one(
+            "#feature2-switcher", ContentSwitcher
+        ).current = "feature2-interface"
+        table = self.query_one("#feature2-table", DataTable)
+        self.query_one("#feature2-raceid", Input).value = ""
+        self.query_one("#feature2-driverid", Input).value = ""
+        table.clear(columns=True)
 
     def _db_query_feature3(self, rID, dID):
         with open("queries/feature-3/pit_delta.sql", "r") as pit_delta:
             pit_delta_template = pit_delta.read()
-            pit_delta_template = pit_delta_template.format(rID, dID)
+            pit_delta_template = pit_delta_template.format(raceID=rID, driverID=dID)
             self.cursor.execute(pit_delta_template)
             table = self.query_one("#feature3-table", DataTable)
-            table.add_columns("Pit Stop Delta Times")
-            for row in self.cursor.fetchall():
-                table.add_row(row[0])
+            table.add_columns("Lap Number", "First Lap Time", "Pit Time", "Pit Delta")
+            table.add_rows(self.cursor.fetchall())
             table.cursor_type = "row"
             table.zebra_stripes = True
+    
+    def _reset_feature3(self):
+        self.query_one(
+            "#feature3-switcher", ContentSwitcher
+        ).current = "feature3-interface"
+        table = self.query_one("#feature3-table", DataTable)
+        self.query_one("#feature3-raceid", Input).value = ""
+        self.query_one("#feature3-driverid", Input).value = ""
+        table.clear(columns=True)
+
+    def _db_query_feature4(self, rID, lap_number):
+        with open("queries/feature-4/lap_info.sql", "r") as lap_info:
+            lap_info_template = lap_info.read()
+            lap_info_template = lap_info_template.format(rID=rID, lapNumber=lap_number)
+            self.cursor.execute(lap_info_template)
+            table = self.query_one("#feature4-table", DataTable)
+            table.add_columns("First Name", "Last Name", "CODE", "Time", "Start Position", "Finish Position")
+            table.add_rows(self.cursor.fetchall())
+            table.cursor_type = "row"
+            table.zebra_stripes = True
+    
+    def _reset_feature4(self):
+        self.query_one(
+            "#feature4-switcher", ContentSwitcher
+        ).current = "feature4-interface"
+        table = self.query_one("#feature4-table", DataTable)
+        self.query_one("#feature4-raceid", Input).value = ""
+        self.query_one("#feature4-lap-number", Input).value = ""
+        table.clear(columns=True)
 
     def _db_query_feature5(self, rID, dID, cID):
         with open("queries/feature-5/disqualify.sql", "r") as disqualify:
@@ -356,87 +361,122 @@ class F1App(App):
             with Container(id="unseeded-error"):
                 yield Static("Please seed the database first.")
 
-            with VerticalScroll(id="feature1"):
+            with VerticalScroll(id="feature1", classes="feature-scroll"):
                 with ContentSwitcher(
                     id="feature1-switcher", initial="feature1-interface"
                 ):
-                    with Container(id="feature1-interface"):
+                    with Container(id="feature1-interface", classes="feature-input"):
                         yield Static(
                             "Please input a season, starting round, and an ending round."
                         )
-                        with Horizontal():
+                        with Center():
                             yield Input(
                                 placeholder="Season...",
                                 id="feature1-season",
                                 type="integer",
                             )
-                        with Horizontal():
+                        with Center():
                             yield Input(
                                 placeholder="Start...",
                                 id="feature1-start",
                                 type="integer",
                             )
-                        with Horizontal():
+                        with Center():
                             yield Input(
                                 placeholder="End...", id="feature1-end", type="integer"
                             )
-                        with Horizontal():
+                        with Center():
                             yield Button("Go", id="feature1-go")
-                    with Horizontal(id="feature1-table-container"):
-                        yield DataTable(id="feature1-table")
+                    with Center(id="feature1-table-container"):
+                        yield DataTable(id="feature1-table", classes="feature-output-table")
 
-            with VerticalScroll(id="feature2"):
+            with VerticalScroll(id="feature2", classes="feature-scroll"):
                 with ContentSwitcher(
                     id="feature2-switcher", initial="feature2-interface"
                 ):
-                    with Container(id="feature2-interface"):
-                        yield Static("Please input a raceID and a driverID")
-                        yield Input(placeholder="Race ID...", id="feature2-raceid")
-                        yield Input(placeholder="Driver ID...", id="feature2-driverid")
-                        yield Button("Go", id="feature2-go")
-                    yield DataTable(id="feature2-table")
+                    with Container(id="feature2-interface", classes="feature-input"):
+                        with Center():
+                            yield Static("Please input a raceID and a driverID")
+                        with Center():
+                            yield Input(placeholder="Race ID...", id="feature2-raceid")
+                        with Center():
+                            yield Input(placeholder="Driver ID...", id="feature2-driverid")
+                        with Center():
+                            yield Button("Go", id="feature2-go")
+                    with Center(id="feature2-table-container"):
+                        yield DataTable(id="feature2-table", classes="feature-output-table")
 
-            with VerticalScroll(id="feature3"):
+            with VerticalScroll(id="feature3", classes="feature-scroll"):
                 with ContentSwitcher(
                     id="feature3-switcher", initial="feature3-interface"
                 ):
-                    with Container(id="feature3-interface"):
-                        yield Static("Please input a raceID and a driverID")
-                        yield Input(placeholder="Race ID...", id="feature3-raceid")
-                        yield Input(placeholder="Driver ID...", id="feature3-driverid")
-                        yield Button("Go", id="feature3-go")
-                    yield DataTable(id="feature3-table")
+                    with Container(id="feature3-interface", classes="feature-input"):
+                        with Center():
+                            yield Static("Please input a raceID and a driverID")
+                        with Center():
+                            yield Input(placeholder="Race ID...", id="feature3-raceid")
+                        with Center():
+                            yield Input(placeholder="Driver ID...", id="feature3-driverid")
+                        with Center():
+                            yield Button("Go", id="feature3-go")
+                    with Center(id="feature3-table-container"):
+                        yield DataTable(id="feature3-table", classes="feature-output-table")
+            
+            with VerticalScroll(id="feature4", classes="feature-scroll"):
+                with ContentSwitcher(
+                    id="feature4-switcher", initial="feature4-interface"
+                ):
+                    with Container(id="feature4-interface", classes="feature-input"):
+                        with Center():
+                            yield Static("Please input a race ID and a lap number.")
+                        with Center():
+                            yield Input(
+                                placeholder="Race ID...",
+                                id="feature4-raceid",
+                                type="integer",
+                            )
+                        with Center():
+                            yield Input(
+                                placeholder="Lap number...",
+                                id="feature4-lap-number",
+                                type="integer",
+                            )
+                        with Center():
+                            yield Button("Go", id="feature4-go")
+                    with Center(id="feature4-table-container"):
+                        yield DataTable(id="feature4-table", classes="feature-output-table")
 
-            with VerticalScroll(id="feature5"):
+            with VerticalScroll(id="feature5", classes="feature-scroll"):
                 with ContentSwitcher(
                     id="feature5-switcher", initial="feature5-interface"
                 ):
-                    with Container(id="feature5-interface"):
-                        yield Static(
-                            "Please input a race ID, driver ID, and constructor ID to disqualify a driver."
-                        )
-                        with Horizontal():
+                    with Container(id="feature5-interface", classes="feature-input"):
+                        with Center():
+                            yield Static(
+                                "Please input a race ID, driver ID, and constructor ID to disqualify a driver."
+                            )
+                        with Center():
                             yield Input(
                                 placeholder="Race ID...",
                                 id="feature5-raceid",
                                 type="integer",
                             )
-                        with Horizontal():
+                        with Center():
                             yield Input(
                                 placeholder="Driver ID...",
                                 id="feature5-driverid",
                                 type="integer",
                             )
-                        with Horizontal():
+                        with Center():
                             yield Input(
                                 placeholder="Constructor ID...",
                                 id="feature5-constructorid",
                                 type="integer",
                             )
-                        with Horizontal():
+                        with Center():
                             yield Button("Disqualify", id="feature5-go")
-                    with Container(id="feature5-success"):
-                        yield Static("Driver successfully disqualified!")
+                    with Center(id="feature5-success"):
+                        yield Static("Driver successfully disqualified!", classes="status-message")
 
         # yield RichLog()
 
@@ -479,7 +519,7 @@ class F1App(App):
             self._db_query_feature2(rID, dID)
             self.query_one(
                 "#feature2-switcher", ContentSwitcher
-            ).current = "feature2-table"
+            ).current = "feature2-table-container"
             self.query_one("#feature2-table", DataTable).focus()
         if button_id == "feature3-go":
             rID = self.query_one("#feature3-raceid", Input).value
@@ -487,8 +527,19 @@ class F1App(App):
             self._db_query_feature3(rID, dID)
             self.query_one(
                 "#feature3-switcher", ContentSwitcher
-            ).current = "feature3-table"
+            ).current = "feature3-table-container"
             self.query_one("#feature3-table", DataTable).focus()
+        if button_id == "feature4-go":
+            rID = self.query_one("#feature4-raceid", Input).value
+            lap_number = self.query_one("#feature4-lap-number", Input).value
+            if rID == "" or lap_number == "":
+                self.notify("Please fill out all fields.")
+                return
+            self._db_query_feature4(rID, lap_number)
+            self.query_one(
+                "#feature4-switcher", ContentSwitcher
+            ).current = "feature4-table-container"
+            self.query_one("#feature4-table", DataTable).focus()
         if button_id == "feature5-go":
             rID = self.query_one("#feature5-raceid", Input).value
             dID = self.query_one("#feature5-driverid", Input).value
@@ -507,6 +558,9 @@ class F1App(App):
 
     def action_back(self) -> None:
         self._reset_feature1()
+        self._reset_feature2()
+        self._reset_feature3()
+        self._reset_feature4()
         self._reset_feature5()
         self.query_one("#view", ContentSwitcher).current = "feature-table"
         self.query_one("#feature-table", DataTable).focus()
@@ -520,6 +574,7 @@ class F1App(App):
             event.row_key == "feature1"
             or event.row_key == "feature2"
             or event.row_key == "feature3"
+            or event.row_key == "feature4"
             or event.row_key == "feature5"
         ):
             if not self.seeded:
@@ -557,7 +612,11 @@ class F1App(App):
             "Find the difference between a driver's first lap and pit lap times for a given race.",
             key="feature3",
         )
-        table.add_row("Feature 4", "Feature 4.", key="feature4")
+        table.add_row(
+            "Lap Info",
+            "Get information about a particular lap in a given race.",
+            key="feature4",
+        )
         table.add_row(
             "Disqualify Driver",
             "Disqualify a specific driver from a specific race.",
