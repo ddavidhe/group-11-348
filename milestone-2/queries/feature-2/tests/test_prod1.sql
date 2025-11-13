@@ -1,0 +1,1 @@
+SELECT AVG(time) FROM laps WHERE rID = 1116 AND dID = 156
