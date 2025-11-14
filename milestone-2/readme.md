@@ -44,6 +44,8 @@ To use the features, in the TUI application menu please use the arrow keys to se
 - Getting the form of all drivers within a window of a given season. The user would give a season, starting round, and ending round, and be able to see how each driver performed during the window.
 - Getting the average lap time of a driver for a given race.
 - Getting the time difference between a selected driver's first lap and pit laps, for a selected race.
+- Getting information on every driver's performance in a given lap of a given race.
+- Allowing users to disqualify drivers from a given race. This involves dropping them to P20 and bumping everyone lower than them up.
 
 ## 6. Production Database
 The production database was generated with the Jupyter Notebooks found in `milestone-2/production_data/data_collection`. To generate them, simply click run.
@@ -56,3 +58,5 @@ To use the features, in the TUI application menu please use the arrow keys to se
 - Getting the form of all drivers within a window of a given season. The user would give a season, starting round, and ending round, and be able to see how each driver performed during the window. The SQL implementation is found in `milestone-2/queries/feature-1/driver_form.sql`.
 - Getting the average lap time of a driver for a given race. The SQL implementation is found in `milestone-2/queries/feature-2/average_lap.sql`.
 - Getting the time difference between a selected driver's first lap and pit laps, for a selected race. The SQL implementation is found in `milestone-2/queries/feature-3/pit_delta.sql`.
+- Getting information on every driver's performance in a given lap of a given race. The SQL implementation is found in `milestone-2/queries/feature-4/lap_info.sql`.
+- Allowing users to disqualify drivers from a given race. This involves dropping them to P20 and bumping everyone lower than them up. The SQL implementation is found in `milestone-2/queries/feature-5/disqualify.sql`.
