@@ -60,3 +60,4 @@ To use the features, in the TUI application menu please use the arrow keys to se
 - Getting the time difference between a selected driver's first lap and pit laps, for a selected race. The SQL implementation is found in `milestone-2/queries/feature-3/pit_delta.sql`.
 - Getting information on every driver's performance in a given lap of a given race. The SQL implementation is found in `milestone-2/queries/feature-4/lap_info.sql`.
 - Allowing users to disqualify drivers from a given race. This involves dropping them to P20 and bumping everyone lower than them up. The SQL implementation is found in `milestone-2/queries/feature-5/disqualify.sql`.
+- Disqualifying a driver from a specific race. The SQL implementation is found in `milestone-2/queries/feature-5/disqualify.sql`.
