@@ -242,6 +242,11 @@ class F1App(App):
     def _count_rounds(self, season):
         self.cursor.execute(f"SELECT COUNT(*) FROM races WHERE season = {season}")
         return self.cursor.fetchone()[0]
+    
+    def _driverInRace(self, rID, dID):
+        self.cursor.execute(
+            f"SELECT EXISTS(SELECT 1 FROM laps WHERE rID = {rID} AND dID = {dID})")
+        return bool(self.cursor.fetchone()[0])
 
     def _db_query_feature1(self, s, e, season):
         with open("queries/feature-1/driver_form.sql", "r") as driver_form:
@@ -524,6 +529,15 @@ class F1App(App):
         if button_id == "feature3-go":
             rID = self.query_one("#feature3-raceid", Input).value
             dID = self.query_one("#feature3-driverid", Input).value
+            if rID == "" or dID == "":
+                self.notify("Please fill out all fields.")
+                return
+            elif int(rID) < 1 or int(dID) < 1:
+                self.notify("Please input a valid ID")
+                return
+            elif not self._driverInRace(rID, dID):
+                self.notify(f"Driver {dID} did not race in race {rID}.")
+                return
             self._db_query_feature3(rID, dID)
             self.query_one(
                 "#feature3-switcher", ContentSwitcher
