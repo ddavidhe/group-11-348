@@ -521,6 +521,15 @@ class F1App(App):
         if button_id == "feature2-go":
             rID = self.query_one("#feature2-raceid", Input).value
             dID = self.query_one("#feature2-driverid", Input).value
+            if rID == "" or dID == "":
+                self.notify("Please fill out all fields.")
+                return
+            elif int(rID) < 1 or int(dID) < 1:
+                self.notify("Please input a valid ID")
+                return
+            elif not self._driverInRace(rID, dID):
+                self.notify(f"Driver {dID} did not race in race {rID}.")
+                return
             self._db_query_feature2(rID, dID)
             self.query_one(
                 "#feature2-switcher", ContentSwitcher
