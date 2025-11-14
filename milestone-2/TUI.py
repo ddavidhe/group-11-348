@@ -403,9 +403,9 @@ class F1App(App):
                         with Center():
                             yield Static("Please input a raceID and a driverID")
                         with Center():
-                            yield Input(placeholder="Race ID...", id="feature2-raceid")
+                            yield Input(placeholder="Race ID...", id="feature2-raceid", type="integer")
                         with Center():
-                            yield Input(placeholder="Driver ID...", id="feature2-driverid")
+                            yield Input(placeholder="Driver ID...", id="feature2-driverid", type="integer")
                         with Center():
                             yield Button("Go", id="feature2-go")
                     with Center(id="feature2-table-container"):
@@ -419,9 +419,9 @@ class F1App(App):
                         with Center():
                             yield Static("Please input a raceID and a driverID")
                         with Center():
-                            yield Input(placeholder="Race ID...", id="feature3-raceid")
+                            yield Input(placeholder="Race ID...", id="feature3-raceid", type="integer")
                         with Center():
-                            yield Input(placeholder="Driver ID...", id="feature3-driverid")
+                            yield Input(placeholder="Driver ID...", id="feature3-driverid", type="integer")
                         with Center():
                             yield Button("Go", id="feature3-go")
                     with Center(id="feature3-table-container"):
