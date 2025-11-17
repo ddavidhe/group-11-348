@@ -113,6 +113,13 @@ class F1App(App):
         self.cursor.execute("USE racing_db;")
         self.seeded = False
 
+    def _db_add_modifications(self):
+        with open("additional_modifications.sql", "r") as schema_file:
+            schema_statements = schema_file.read().split(";")
+            for statement in schema_statements:
+                if statement.strip():
+                    self.cursor.execute(statement)
+
     def _db_seed_sample(self):
         def seed(n, c):
             with open(n, "r") as data_file:
@@ -142,6 +149,7 @@ class F1App(App):
         seed("sample_data/sample_weather_data.sql", self.cursor)
         self.conn.commit()
         self.seeded = True
+        self.notify("Successfully seeded sample data!")
 
     def _db_seed_prod(self):
         # self.query_one(RichLog).write("Seeding production database.")
@@ -238,6 +246,7 @@ class F1App(App):
         self.cursor.execute(laps_string)
         self.conn.commit()
         self.seeded = True
+        self.notify("Successfully seeded production data!")
 
     def _count_rounds(self, season):
         self.cursor.execute(f"SELECT COUNT(*) FROM races WHERE season = {season}")
@@ -347,11 +356,34 @@ class F1App(App):
         self.query_one("#feature5-driverid", Input).value = ""
         self.query_one("#feature5-constructorid", Input).value = ""
 
+    def _db_query_advanced_feature1(self, dname, rname):
+        with open("advanced/feature-1/driver_track_history.sql", "r") as driver_track_history:
+            driver_track_history_template = driver_track_history.read()
+            driver_track_history_template = driver_track_history_template.format(dname, rname)
+            self.cursor.execute(driver_track_history_template)
+            table = self.query_one("#advancedfeature1-table", DataTable)
+            table.add_columns("First Name", "Last Name", "Track Name", "Track Country", "Race Count", "Average Qualifying", "Average Finish")
+            rows = self.cursor.fetchall()
+            if not rows:
+                self.notify("No results found.")
+            table.add_rows(rows)
+            table.cursor_type = "row"
+            table.zebra_stripes = True
+
+    def _reset_advanced_feature1(self):
+        self.query_one(
+            "#advancedfeature1-switcher", ContentSwitcher
+        ).current = "advancedfeature1-interface"
+        table = self.query_one("#advancedfeature1-table", DataTable)
+        self.query_one("#advancedfeature1-dname", Input).value = ""
+        self.query_one("#advancedfeature1-rname", Input).value = ""
+        table.clear(columns=True)
+
     def compose(self) -> ComposeResult:
         yield Static(self.LOGO, id="logo")
 
         with ContentSwitcher(id="view", initial="feature-table"):
-            yield DataTable(id="feature-table")
+            yield DataTable(id="feature-table", classes="feature-output-table")
 
             with VerticalScroll(id="seedsample"):
                 yield Button(
@@ -483,6 +515,31 @@ class F1App(App):
                     with Center(id="feature5-success"):
                         yield Static("Driver successfully disqualified!", classes="status-message")
 
+            with VerticalScroll(id="advancedfeature1", classes="feature-scroll"):
+                with ContentSwitcher(
+                    id="advancedfeature1-switcher", initial='advancedfeature1-interface'
+                ):
+                    with Container(id="advancedfeature1-interface", classes="feature-input"):
+                        with Center():
+                            yield Static(
+                                "Please input a driver's name and a race's name to see the history."
+                            )
+                        with Center():
+                            yield Input(
+                                placeholder="Driver Name...",
+                                id="advancedfeature1-dname",
+                                type="text",
+                            )
+                        with Center():
+                            yield Input(
+                                placeholder="Race Name...",
+                                id="advancedfeature1-rname",
+                                type="text",
+                            )
+                        with Center():
+                            yield Button("Go", id="advancedfeature1-go")
+                    with Center(id="advancedfeature1-table-container"):
+                        yield DataTable(id="advancedfeature1-table", classes="feature-output-table")
         # yield RichLog()
 
         yield Static(
@@ -494,8 +551,10 @@ class F1App(App):
         button_id = event.button.id
         if button_id == "seed-sample-btn":
             self._db_seed_sample()
+            self._db_add_modifications()
         if button_id == "seed-prod-btn":
             self._db_seed_prod()
+            self._db_add_modifications()
         if button_id == "feature1-go":
             season = self.query_one("#feature1-season", Input).value
             s = self.query_one("#feature1-start", Input).value
@@ -578,6 +637,16 @@ class F1App(App):
                 self.notify("Driver successfully disqualified!")
             except Exception as e:
                 self.notify(f"Error: {str(e)}")
+        if button_id == "advancedfeature1-go":
+            dname = self.query_one("#advancedfeature1-dname", Input).value
+            rname = self.query_one("#advancedfeature1-rname", Input).value
+            if rname == "" or dname == "":
+                self.notify("Please fill out all fields.")
+                return
+            self._db_query_advanced_feature1(dname, rname)
+            self.query_one(
+                "#advancedfeature1-switcher", ContentSwitcher
+            ).current = "advancedfeature1-table-container"
 
     def action_back(self) -> None:
         self._reset_feature1()
@@ -585,6 +654,7 @@ class F1App(App):
         self._reset_feature3()
         self._reset_feature4()
         self._reset_feature5()
+        self._reset_advanced_feature1()
         self.query_one("#view", ContentSwitcher).current = "feature-table"
         self.query_one("#feature-table", DataTable).focus()
 
@@ -599,6 +669,7 @@ class F1App(App):
             or event.row_key == "feature3"
             or event.row_key == "feature4"
             or event.row_key == "feature5"
+            or event.row_key == "advancedfeature1"
         ):
             if not self.seeded:
                 self.query_one("#view", ContentSwitcher).current = "unseeded-error"
@@ -644,6 +715,11 @@ class F1App(App):
             "Disqualify Driver",
             "Disqualify a specific driver from a specific race.",
             key="feature5",
+        )
+        table.add_row(
+            "Driver Track History",
+            "Given a track name and a driver name, find their statistics.",
+            key="advancedfeature1",
         )
 
         table.cursor_type = "row"
