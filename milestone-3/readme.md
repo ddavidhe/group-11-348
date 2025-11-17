@@ -1,4 +1,4 @@
-# Milestone 2
+# Milestone 3
 
 ## 1. Download Dependencies and MySQL
 
