@@ -146,6 +146,7 @@ class F1App(App):
             seed("sample_data/sample_weather_data.sql", self.cursor)
             self.conn.commit()
             self.seeded = True
+            self._db_add_modifications()
             self.notify("Successfully seeded sample data!")
         except Exception as e:
             self.notify(f"Error: {str(e)}")
@@ -245,6 +246,7 @@ class F1App(App):
             self.cursor.execute(laps_string)
             self.conn.commit()
             self.seeded = True
+            self._db_add_modifications()
             self.notify("Successfully seeded production data!")
         except Exception as e:
             self.notify(f"Error: {str(e)}")
@@ -668,12 +670,8 @@ class F1App(App):
                 self.query_one("#feature-table", DataTable).focus()
         if button_id == "seed-sample-btn":
             self._db_seed_sample()
-            if self.seeded:
-                self._db_add_modifications()
         if button_id == "seed-prod-btn":
             self._db_seed_prod()
-            if self.seeded:
-                self._db_add_modifications()
         if button_id == "feature1-go":
             season = self.query_one("#feature1-season", Input).value
             s = self.query_one("#feature1-start", Input).value
