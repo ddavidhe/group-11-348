@@ -116,43 +116,6 @@ class F1App(App):
             background: darkred;
             color: white;
         }
-
-        #feature8-reference-container {
-            width: 35%;
-            height: auto;
-        }
-
-        #feature8-form-container {
-            width: 65%;
-            height: auto;
-            padding: 0 1;
-        }
-
-        #feature8-race-info {
-            width: 40%;
-            height: auto;
-            padding: 0 1;
-        }
-
-        #feature8-data-container {
-            width: 60%;
-            height: auto;
-            padding: 0 1;
-        }
-
-        #feature8-race-info Input {
-            width: 100%;
-            margin-bottom: 1;
-        }
-
-        #feature8-results, #feature8-laps {
-            height: 8;
-            margin-bottom: 1;
-        }
-
-        #feature8-drivers-table, #feature8-constructors-table {
-            max-height: 15;
-        }
     """
 
     def __init__(self):
@@ -516,7 +479,6 @@ class F1App(App):
     # Feature 7: DELETE operations
 
     def _db_query_feature7b_preview(self, rID):
-        
         preview_sql = """
             SELECT
                 r.rID,
@@ -546,7 +508,6 @@ class F1App(App):
             return False
 
     def _db_query_feature7b_delete(self, rID):
-        
         try:
             with open("queries/feature-7/delete_race.sql", "r") as f:
                 delete_template = f.read()
@@ -571,7 +532,6 @@ class F1App(App):
         table.clear(columns=True)
 
     def _db_query_feature7c_preview(self, dID):
-        
         preview_sql = """
             SELECT
                 d.dID,
@@ -608,7 +568,6 @@ class F1App(App):
             return False
 
     def _db_query_feature7c_delete(self, dID):
-        
         try:
             with open("queries/feature-7/delete_driver.sql", "r") as f:
                 delete_template = f.read()
@@ -633,7 +592,6 @@ class F1App(App):
         table.clear(columns=True)
 
     def _db_query_feature7d_preview(self, cID):
-        
         preview_sql = """
             SELECT
                 c.cID,
@@ -661,7 +619,6 @@ class F1App(App):
             return False
 
     def _db_query_feature7d_delete(self, cID):
-        
         try:
             with open("queries/feature-7/delete_constructor.sql", "r") as f:
                 delete_template = f.read()
@@ -685,270 +642,23 @@ class F1App(App):
         self.query_one("#feature7d-constructorid", Input).value = ""
         table.clear(columns=True)
 
-    # Feature 8: ADD Complete Race with Results
-    def _db_show_drivers_reference(self):
-        
-        try:
-            self.cursor.execute("""
-                SELECT d.dID, d.firstName, d.lastName, d.driverTag
-                FROM drivers d
-                ORDER BY d.dID
-            """)
-            results = self.cursor.fetchall()
-            table = self.query_one("#feature8-drivers-table", DataTable)
-            table.clear(columns=True)
-            table.add_columns("Driver ID", "First Name", "Last Name", "Tag")
-            for row in results:
-                table.add_row(*row)
+    # Feature 8: Constructor Points Query
+    def _db_query_feature8(self):
+        with open("queries/feature-8/constructor_points.sql", "r") as constructor_points:
+            constructor_points_query = constructor_points.read()
+            self.cursor.execute(constructor_points_query)
+            table = self.query_one("#feature8-table", DataTable)
+            table.add_columns("Constructor ID", "Name", "Total Points")
+            table.add_rows(self.cursor.fetchall())
             table.cursor_type = "row"
             table.zebra_stripes = True
-            return True
-        except Exception as e:
-            self.notify(f"Error loading drivers: {str(e)}")
-            return False
-
-    def _db_show_constructors_reference(self):
-        
-        try:
-            self.cursor.execute("""
-                SELECT cID, name
-                FROM constructors
-                ORDER BY cID
-            """)
-            results = self.cursor.fetchall()
-            table = self.query_one("#feature8-constructors-table", DataTable)
-            table.clear(columns=True)
-            table.add_columns("Constructor ID", "Name")
-            for row in results:
-                table.add_row(*row)
-            table.cursor_type = "row"
-            table.zebra_stripes = True
-            return True
-        except Exception as e:
-            self.notify(f"Error loading constructors: {str(e)}")
-            return False
-
-    def _db_query_feature8(
-        self, rID, trackName, trackCountry, round_num, season, results_csv, laps_csv=""
-    ):
-        
-        
-        try:
-            rID = int(str(rID).strip())
-            round_num = int(str(round_num).strip())
-            season = int(str(season).strip())
-        except Exception:
-            self.notify("Race ID, Round, and Season must be integers.")
-            return False
-        
-        results = []
-        try:
-            lines = results_csv.strip().split("\n")
-            for line in lines:
-                line = line.strip()
-                if not line or line.startswith("dID") or line.startswith("#"):
-                    continue
-                parts = [p.strip() for p in line.split(",")]
-                if len(parts) != 4:
-                    self.notify(
-                        f"Invalid result format: {line}. Expected: dID,cID,startPos,finishPos"
-                    )
-                    return False
-                dID, cID, startPos, finishPos = parts
-                results.append((int(dID), int(cID), int(startPos), int(finishPos)))
-        except Exception as e:
-            self.notify(f"Error parsing results: {str(e)}")
-            return False
-
-        if not results:
-            self.notify("No results provided! Add at least one result.")
-            return False
-
-        
-        laps = []
-        if not laps_csv.strip():
-            self.notify("Laps are required. Please provide laps CSV data.")
-            return False
-        try:
-            lines = laps_csv.strip().split("\n")
-            for line in lines:
-                line = line.strip()
-                if not line or line.startswith("dID") or line.startswith("#"):
-                    continue
-                parts = [p.strip() for p in line.split(",")]
-                if len(parts) not in [5, 6, 7, 8]:
-                    self.notify(
-                        f"Invalid lap format: {line}. Expected: dID,lapNum,time,standing,finishTime[,enterPit,exitPit]"
-                    )
-                    return False
-                dID = int(parts[0])
-                lapNumber = int(parts[1])
-                time = float(parts[2])
-                standing = int(parts[3])
-                finishTime = float(parts[4])
-                enterPitTime = (
-                    float(parts[5])
-                    if len(parts) > 5 and parts[5] and parts[5].lower() != "null"
-                    else None
-                )
-                exitPitTime = (
-                    float(parts[6])
-                    if len(parts) > 6 and parts[6] and parts[6].lower() != "null"
-                    else None
-                )
-                laps.append(
-                    (
-                        dID,
-                        lapNumber,
-                        time,
-                        standing,
-                        finishTime,
-                        enterPitTime,
-                        exitPitTime,
-                    )
-                )
-        except Exception as e:
-            self.notify(f"Error parsing laps: {str(e)}")
-            return False
-        if not laps:
-            self.notify("No laps provided! Add at least one lap.")
-            return False
-
-        
-        check_race_sql = "SELECT COUNT(*) FROM races WHERE season = %s AND round = %s"
-        self.cursor.execute(check_race_sql, (season, round_num))
-        if self.cursor.fetchone()[0] > 0:
-            self.notify("A race already exists for this season and round!")
-            return False
-
-        check_rid_sql = "SELECT COUNT(*) FROM races WHERE rID = %s"
-        self.cursor.execute(check_rid_sql, (rID,))
-        if self.cursor.fetchone()[0] > 0:
-            self.notify("Race ID already exists!")
-            return False
-
-        
-        for dID, cID, _, _ in results:
-            check_driver = "SELECT COUNT(*) FROM drivers WHERE dID = %s"
-            self.cursor.execute(check_driver, (dID,))
-            if self.cursor.fetchone()[0] == 0:
-                self.notify(f"Driver ID {dID} does not exist!")
-                return False
-
-            check_constructor = "SELECT COUNT(*) FROM constructors WHERE cID = %s"
-            self.cursor.execute(check_constructor, (cID,))
-            if self.cursor.fetchone()[0] == 0:
-                self.notify(f"Constructor ID {cID} does not exist!")
-                return False
-
-        
-        if laps:
-            result_drivers = {dID for dID, _, _, _ in results}
-            lap_drivers = {dID for dID, _, _, _, _, _, _ in laps}
-            if not lap_drivers.issubset(result_drivers):
-                missing = lap_drivers - result_drivers
-                self.notify(f"Lap data contains drivers not in results: {missing}")
-                return False
-
-        
-        try:
-            
-            with open("queries/feature-8/add_complete_race.sql", "r") as f:
-                sql_template = f.read()
-
-            
-            results_values = []
-            for dID, cID, startPos, finishPos in results:
-                results_values.append(f"({rID}, {dID}, {cID}, {startPos}, {finishPos})")
-            results_insert = (
-                "INSERT INTO results (rID, dID, cID, startPos, finishPos) VALUES\n"
-                + ",\n".join(results_values)
-                + ";"
-            )
-
-
-            laps_values = []
-            for dID, lapNum, time, standing, finishTime, enterPit, exitPit in laps:
-                enterPitStr = "NULL" if enterPit is None else str(enterPit)
-                exitPitStr = "NULL" if exitPit is None else str(exitPit)
-                laps_values.append(
-                    f"({rID}, {dID}, {lapNum}, {time}, {standing}, {finishTime}, {enterPitStr}, {exitPitStr})"
-                )
-            laps_insert = (
-                "INSERT INTO laps (rID, dID, lapNumber, time, standing, finishTime, enterPitTime, exitPitTime) VALUES\n"
-                + ",\n".join(laps_values)
-                + ";"
-            )
-
-            
-            sql = sql_template.format(
-                rID=rID,
-                trackName=trackName,
-                trackCountry=trackCountry,
-                round=round_num,
-                season=season,
-                results_insert=results_insert,
-                laps_insert=laps_insert,
-            )
-
-            
-            for statement in sql.split(";"):
-                statement = statement.strip()
-                if statement and not statement.startswith("--"):
-                    self.cursor.execute(statement)
-            
-            try:
-                self.conn.commit()
-            except Exception:
-                pass
-
-            
-            self.cursor.execute(
-                "SELECT rID, trackName, trackCountry, round, season FROM races WHERE rID = %s",
-                (rID,),
-            )
-            race_info = self.cursor.fetchone()
-
-            table = self.query_one("#feature8-result-table", DataTable)
-            table.clear(columns=True)
-            table.add_columns(
-                "Race ID", "Track", "Country", "Round", "Season", "Results", "Laps"
-            )
-            if race_info is None:
-                
-                race_info = (rID, trackName, trackCountry, round_num, season)
-            table.add_row(*race_info, len(results), len(laps) if laps else 0)
-            msg = f"Race and {len(results)} results successfully added! ({len(laps)} laps included)"
-            self.notify(msg)
-            return True
-
-            
-
-        except Exception as e:
-            self.conn.rollback()
-            self.notify(f"Error: {str(e)}")
-            return False
 
     def _reset_feature8(self):
         self.query_one(
             "#feature8-switcher", ContentSwitcher
         ).current = "feature8-interface"
-        result_table = self.query_one("#feature8-result-table", DataTable)
-        drivers_table = self.query_one("#feature8-drivers-table", DataTable)
-        constructors_table = self.query_one("#feature8-constructors-table", DataTable)
-        self.query_one("#feature8-raceid", Input).value = ""
-        self.query_one("#feature8-trackname", Input).value = ""
-        self.query_one("#feature8-trackcountry", Input).value = ""
-        self.query_one("#feature8-round", Input).value = ""
-        self.query_one("#feature8-season", Input).value = ""
-        self.query_one("#feature8-results", TextArea).clear()
-        self.query_one("#feature8-laps", TextArea).clear()
-        result_table.clear(columns=True)
-        drivers_table.clear(columns=True)
-        constructors_table.clear(columns=True)
-        
-        self._db_show_drivers_reference()
-        self._db_show_constructors_reference()
+        table = self.query_one("#feature8-table", DataTable)
+        table.clear(columns=True)
 
     def compose(self) -> ComposeResult:
         yield Static(self.LOGO, id="logo")
@@ -1199,8 +909,6 @@ class F1App(App):
                     with Center():
                         yield Button("Go", id="advancedfeature2b-go")
 
-            
-
             with VerticalScroll(id="feature7b", classes="feature-scroll"):
                 with ContentSwitcher(
                     id="feature7b-switcher", initial="feature7b-interface"
@@ -1297,89 +1005,21 @@ class F1App(App):
                             classes="status-message",
                         )
 
-            
             with VerticalScroll(id="feature8", classes="feature-scroll"):
                 with ContentSwitcher(
                     id="feature8-switcher", initial="feature8-interface"
                 ):
                     with Container(id="feature8-interface", classes="feature-input"):
-                        yield Static(
-                            "Add a complete race with all results in one transaction."
-                        )
-
-                        with Horizontal():
-                            
-                            with Container(id="feature8-reference-container"):
-                                yield Static("Reference: Available Drivers")
-                                yield DataTable(
-                                    id="feature8-drivers-table",
-                                    classes="feature-output-table",
-                                )
-
-                                yield Static("Reference: Available Constructors")
-                                yield DataTable(
-                                    id="feature8-constructors-table",
-                                    classes="feature-output-table",
-                                )
-
-                            
-                            with Container(id="feature8-form-container"):
-                                with Horizontal():
-                                    
-                                    with Container(id="feature8-race-info"):
-                                        yield Static("Race Information:")
-                                        yield Input(
-                                            placeholder="Race ID...",
-                                            id="feature8-raceid",
-                                            type="integer",
-                                        )
-                                        yield Input(
-                                            placeholder="Track Name...",
-                                            id="feature8-trackname",
-                                            type="text",
-                                        )
-                                        yield Input(
-                                            placeholder="Track Country...",
-                                            id="feature8-trackcountry",
-                                            type="text",
-                                        )
-                                        yield Input(
-                                            placeholder="Round...",
-                                            id="feature8-round",
-                                            type="integer",
-                                        )
-                                        yield Input(
-                                            placeholder="Season...",
-                                            id="feature8-season",
-                                            type="integer",
-                                        )
-
-                                    
-                                    with Container(id="feature8-data-container"):
-                                        yield Static(
-                                            "Results (CSV: dID,cID,startPos,finishPos):"
-                                        )
-                                        yield TextArea(id="feature8-results")
-
-                                        yield Static(
-                                            "Laps (CSV: dID,lapNum,time,standing,finishTime,enterPit,exitPit):"
-                                        )
-                                        yield TextArea(id="feature8-laps")
-
-                                with Center():
-                                    yield Button("Add Complete Race", id="feature8-go")
-
-                    with Container(
-                        id="feature8-success-container", classes="feature-input"
-                    ):
-                        yield Static("Race and results successfully added!")
-                        yield DataTable(
-                            id="feature8-result-table", classes="feature-output-table"
-                        )
                         with Center():
-                            yield Button("Add Another Race", id="feature8-reset")
-
-        
+                            yield Static(
+                                "View constructor points standings across all seasons."
+                            )
+                        with Center():
+                            yield Button("Show Constructor Points", id="feature8-go")
+                    with Center(id="feature8-table-container"):
+                        yield DataTable(
+                            id="feature8-table", classes="feature-output-table"
+                        )
 
         yield Static(
             "Press \[Enter] to select a feature, press \[Escape] to go back, and press \[q] to quit.",
@@ -1506,8 +1146,6 @@ class F1App(App):
                 return
             self._db_advanced_feature2b(username)
 
-        
-
         if button_id == "feature7b-preview":
             rID = self.query_one("#feature7b-raceid", Input).value
             if rID == "":
@@ -1562,34 +1200,12 @@ class F1App(App):
         if button_id == "feature7d-cancel":
             self._reset_feature7d()
 
-        
         if button_id == "feature8-go":
-            rID = self.query_one("#feature8-raceid", Input).value
-            trackName = self.query_one("#feature8-trackname", Input).value
-            trackCountry = self.query_one("#feature8-trackcountry", Input).value
-            round_num = self.query_one("#feature8-round", Input).value
-            season = self.query_one("#feature8-season", Input).value
-            results_csv = self.query_one("#feature8-results", TextArea).text
-            laps_csv = self.query_one("#feature8-laps", TextArea).text
-            if (
-                rID == ""
-                or trackName == ""
-                or trackCountry == ""
-                or round_num == ""
-                or season == ""
-                or results_csv == ""
-                or laps_csv == ""
-            ):
-                self.notify("Please fill out all required fields (laps are required).")
-                return
-            if self._db_query_feature8(
-                rID, trackName, trackCountry, round_num, season, results_csv, laps_csv
-            ):
-                self.query_one(
-                    "#feature8-switcher", ContentSwitcher
-                ).current = "feature8-success-container"
-        if button_id == "feature8-reset":
-            self._reset_feature8()
+            self._db_query_feature8()
+            self.query_one(
+                "#feature8-switcher", ContentSwitcher
+            ).current = "feature8-table-container"
+            self.query_one("#feature8-table", DataTable).focus()
 
     def action_back(self) -> None:
         if self.cursor is None:
@@ -1611,7 +1227,6 @@ class F1App(App):
 
     @on(DataTable.RowSelected)
     def on_data_table_cell_selected(self, event: DataTable.RowSelected) -> None:
-        
         if event.row_key == "seedsample" or event.row_key == "seedprod":
             self.query_one("#view", ContentSwitcher).current = event.row_key
         elif (
@@ -1632,10 +1247,6 @@ class F1App(App):
                 self.query_one("#view", ContentSwitcher).current = "unseeded-error"
             else:
                 self.query_one("#view", ContentSwitcher).current = event.row_key
-                
-                if event.row_key == "feature8":
-                    self._db_show_drivers_reference()
-                    self._db_show_constructors_reference()
 
     def on_mount(self) -> None:
         table = self.query_one("#feature-table", DataTable)
@@ -1692,7 +1303,7 @@ class F1App(App):
             "Gives a user edit access.",
             key="advancedfeature2b",
         )
-        
+
         table.add_row(
             "Delete Entire Race",
             "Delete a complete race and all associated data.",
@@ -1709,8 +1320,8 @@ class F1App(App):
             key="feature7d",
         )
         table.add_row(
-            "Add Complete Race",
-            "Add a race with all results in one transaction (CSV format).",
+            "Constructor Points",
+            "View total points for all constructors across all seasons.",
             key="feature8",
         )
 
