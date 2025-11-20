@@ -57,7 +57,6 @@ with open("queries/feature-3/pit_delta.sql", "r") as pit_delta:
 
 with open("queries/feature-4/lap_info.sql", "r") as lap_info:
     lap_info_template = lap_info.read()
-    lap_info_template = lap_info_template.format(rID=2, lapNumber=63)
     _ = cursor.execute(lap_info_template)
     for row in cursor.fetchall():
         print(row)
