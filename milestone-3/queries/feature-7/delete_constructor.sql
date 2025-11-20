@@ -1,0 +1,5 @@
+START TRANSACTION;
+
+DELETE FROM constructors WHERE cID = {cID};
+
+COMMIT;

@@ -37,8 +37,8 @@ CREATE TABLE laps (
     enterPitTime FLOAT, -- timestamp of entering pit (seconds)
     exitPitTime FLOAT, -- timestamp of exiting pit (seconds)
     PRIMARY KEY (rID, dID, lapNumber),
-    FOREIGN KEY (rID) REFERENCES races(rID),
-    FOREIGN KEY (dID) REFERENCES drivers(dID)
+    FOREIGN KEY (rID) REFERENCES races(rID) ON DELETE CASCADE,
+    FOREIGN KEY (dID) REFERENCES drivers(dID) ON DELETE CASCADE
 );
 
 CREATE TABLE weather (
@@ -48,7 +48,7 @@ CREATE TABLE weather (
     windSpeed FLOAT NOT NULL,
     trackTemperature FLOAT NOT NULL,
     airTemperature FLOAT NOT NULL,
-    FOREIGN KEY (rID) REFERENCES races(rID)
+    FOREIGN KEY (rID) REFERENCES races(rID) ON DELETE CASCADE
 );
 
 CREATE TABLE results (
@@ -58,7 +58,7 @@ CREATE TABLE results (
     startPos INT NOT NULL,
     finishPos INT NOT NULL,
     PRIMARY KEY (dID, cID, rID),
-    FOREIGN KEY (dID) REFERENCES drivers(dID),
-    FOREIGN KEY (cID) REFERENCES constructors(cID),
-    FOREIGN KEY (rID) REFERENCES races(rID)
+    FOREIGN KEY (dID) REFERENCES drivers(dID) ON DELETE CASCADE,
+    FOREIGN KEY (cID) REFERENCES constructors(cID) ON DELETE CASCADE,
+    FOREIGN KEY (rID) REFERENCES races(rID) ON DELETE CASCADE
 );
