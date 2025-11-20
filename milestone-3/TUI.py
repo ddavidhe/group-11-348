@@ -476,8 +476,6 @@ class F1App(App):
     def _reset_advanced_feature2b(self):
         self.query_one("#advancedfeature2b-username", Input).value = ""
 
-    # Feature 7: DELETE operations
-
     def _db_query_feature7b_preview(self, rID):
         preview_sql = """
             SELECT
@@ -642,9 +640,10 @@ class F1App(App):
         self.query_one("#feature7d-constructorid", Input).value = ""
         table.clear(columns=True)
 
-    # Feature 8: Constructor Points Query
     def _db_query_feature8(self):
-        with open("queries/feature-8/constructor_points.sql", "r") as constructor_points:
+        with open(
+            "queries/feature-8/constructor_points.sql", "r"
+        ) as constructor_points:
             constructor_points_query = constructor_points.read()
             self.cursor.execute(constructor_points_query)
             table = self.query_one("#feature8-table", DataTable)
