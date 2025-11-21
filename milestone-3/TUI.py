@@ -507,7 +507,7 @@ class F1App(App):
 
     def _db_query_feature7b_delete(self, rID):
         try:
-            with open("queries/feature-7/delete_race.sql", "r") as f:
+            with open("advanced/feature-7/delete_race.sql", "r") as f:
                 delete_template = f.read()
                 delete_template = delete_template.format(rID=rID)
                 for statement in delete_template.split(";"):
@@ -567,7 +567,7 @@ class F1App(App):
 
     def _db_query_feature7c_delete(self, dID):
         try:
-            with open("queries/feature-7/delete_driver.sql", "r") as f:
+            with open("advanced/feature-7/delete_driver.sql", "r") as f:
                 delete_template = f.read()
                 delete_template = delete_template.format(dID=dID)
                 for statement in delete_template.split(";"):
@@ -618,7 +618,7 @@ class F1App(App):
 
     def _db_query_feature7d_delete(self, cID):
         try:
-            with open("queries/feature-7/delete_constructor.sql", "r") as f:
+            with open("advanced/feature-7/delete_constructor.sql", "r") as f:
                 delete_template = f.read()
                 delete_template = delete_template.format(cID=cID)
                 for statement in delete_template.split(";"):
@@ -642,7 +642,7 @@ class F1App(App):
 
     def _db_query_feature8(self):
         with open(
-            "queries/feature-8/constructor_points.sql", "r"
+            "advanced/feature-8/constructor_points.sql", "r"
         ) as constructor_points:
             constructor_points_query = constructor_points.read()
             self.cursor.execute(constructor_points_query)
