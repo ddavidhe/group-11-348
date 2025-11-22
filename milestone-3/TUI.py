@@ -159,6 +159,7 @@ class F1App(App):
             seed("sample_data/sample_results_data.sql", self.cursor)
             seed("sample_data/sample_laps_data.sql", self.cursor)
             seed("sample_data/sample_weather_data.sql", self.cursor)
+            seed("advanced/feature-3/create_constructor_view.sql", self.cursor)
             self.conn.commit()
             self.seeded = True
             self._db_add_modifications()
@@ -261,6 +262,13 @@ class F1App(App):
             self.cursor.execute(point_string)
             self.cursor.execute(weather_string)
             self.cursor.execute(laps_string)
+
+            with open("/advanced/feature-3/create_constructor_view.sql", "r") as data_file:
+                data_statements = data_file.read().split(";")
+                for ds in data_statements:
+                    if ds.strip():
+                        self.cursor.execute(ds)
+
             self.conn.commit()
             self.seeded = True
             self._db_add_modifications()
@@ -475,6 +483,40 @@ class F1App(App):
 
     def _reset_advanced_feature2b(self):
         self.query_one("#advancedfeature2b-username", Input).value = ""
+    
+
+    # Note: this feature has A LOT of columns. Expand terminal to its widest setting 
+    def _db_query_advanced_feature3(self, cID1, cID2):
+        try:
+            with open("advanced/feature-3/constructor_master.sql", "r") as constructor_master:
+                constructor_master_template = constructor_master.read()
+                constructor_master_template = constructor_master_template.format(
+                    cID1, cID2
+                )
+                for statement in constructor_master_template.split(";"):
+                    if statement.strip():
+                        self.cursor.execute(statement)
+                table = self.query_one("#advancedfeature3-table", DataTable)
+                table.add_columns(
+                    "Race ID", "Track Name",
+                    "Last Name", "First Name", "Starting Position", "Finishing Position",
+                    "Last Name", "First Name", "Starting Position", "Finishing Position",
+                    "Finish Delta"
+                )
+                table.add_rows(self.cursor.fetchall())
+                table.cursor_type = "row"
+                table.zebra_stripes = True
+        except Exception as e:
+            self.notify(f"Error: {str(e)}")
+    
+    def _reset_advanced_feature3(self):
+        self.query_one(
+            "#advancedfeature3-switcher", ContentSwitcher
+        ).current = "advancedfeature3-interface"
+        table = self.query_one("#advancedfeature3-table", DataTable)
+        self.query_one("#advancedfeature3-constructorid1", Input).value = ""
+        self.query_one("#advancedfeature3-constructorid2", Input).value = ""
+        table.clear(columns=True)
 
     def _db_query_feature7b_preview(self, rID):
         preview_sql = """
@@ -908,6 +950,33 @@ class F1App(App):
                     with Center():
                         yield Button("Go", id="advancedfeature2b-go")
 
+            with VerticalScroll(id="advancedfeature3", classes="feature-scroll"):
+                with ContentSwitcher(
+                    id="advancedfeature3-switcher", initial="advancedfeature3-interface"
+                ):
+                    with Container(
+                        id="advancedfeature3-interface", classes="feature-input"
+                    ):
+                        yield Static("Compare 2 constructors in common races.")
+                        with Center():
+                            yield Input(
+                                placeholder="Constructor ID...",
+                                id="advancedfeature3-constructorid1",
+                                type="integer",
+                            )
+                            yield Input(
+                                placeholder="Constructor ID...",
+                                id="advancedfeature3-constructorid2",
+                                type="integer",
+                            )
+                        with Center():
+                            yield Button("Go", id="advancedfeature3-go")
+                    with Center(id="advancedfeature3-table-container"):
+                        yield DataTable(
+                            id="advancedfeature3-table",
+                            classes="feature-output-table",
+                        )
+
             with VerticalScroll(id="feature7b", classes="feature-scroll"):
                 with ContentSwitcher(
                     id="feature7b-switcher", initial="feature7b-interface"
@@ -1145,6 +1214,21 @@ class F1App(App):
                 return
             self._db_advanced_feature2b(username)
 
+        if button_id == "advancedfeature3-go":
+            cID1 = self.query_one("#advancedfeature3-constructorid1", Input).value
+            cID2 = self.query_one("#advancedfeature3-constructorid2", Input).value
+            if cID1 == "" or cID2 == "":
+                self.notify("Please fill out all fields.")
+                return
+            if cID1 == cID2:
+                self.notify("Please input two different constructor IDs.")
+                return
+            self._db_query_advanced_feature3(cID1, cID2)
+            self.query_one(
+                "#advancedfeature3-switcher", ContentSwitcher
+            ).current = "advancedfeature3-table-container"
+            self.query_one("#advancedfeature3-table", DataTable).focus()
+
         if button_id == "feature7b-preview":
             rID = self.query_one("#feature7b-raceid", Input).value
             if rID == "":
@@ -1217,6 +1301,7 @@ class F1App(App):
         self._reset_advanced_feature1()
         self._reset_advanced_feature2a()
         self._reset_advanced_feature2b()
+        self._reset_advanced_feature3()
         self._reset_feature7b()
         self._reset_feature7c()
         self._reset_feature7d()
@@ -1237,6 +1322,7 @@ class F1App(App):
             or event.row_key == "advancedfeature1"
             or event.row_key == "advancedfeature2a"
             or event.row_key == "advancedfeature2b"
+            or event.row_key == "advancedfeature3"
             or event.row_key == "feature7b"
             or event.row_key == "feature7c"
             or event.row_key == "feature7d"
@@ -1302,7 +1388,11 @@ class F1App(App):
             "Gives a user edit access.",
             key="advancedfeature2b",
         )
-
+        table.add_row(
+            "Constructor Comparison",
+            "View master data for a specific constructor.",
+            key="advancedfeature3",
+        )
         table.add_row(
             "Delete Entire Race",
             "Delete a complete race and all associated data.",
