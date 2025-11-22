@@ -159,6 +159,7 @@ class F1App(App):
             seed("sample_data/sample_results_data.sql", self.cursor)
             seed("sample_data/sample_laps_data.sql", self.cursor)
             seed("sample_data/sample_weather_data.sql", self.cursor)
+            seed("advanced/feature-3/create_constructor_view.sql", self.cursor)
             self.conn.commit()
             self.seeded = True
             self._db_add_modifications()
@@ -261,6 +262,13 @@ class F1App(App):
             self.cursor.execute(point_string)
             self.cursor.execute(weather_string)
             self.cursor.execute(laps_string)
+
+            with open("/advanced/feature-3/create_constructor_view.sql", "r") as data_file:
+                data_statements = data_file.read().split(";")
+                for ds in data_statements:
+                    if ds.strip():
+                        self.cursor.execute(ds)
+
             self.conn.commit()
             self.seeded = True
             self._db_add_modifications()
