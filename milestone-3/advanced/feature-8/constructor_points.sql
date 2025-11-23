@@ -10,4 +10,5 @@ JOIN races AS ra
 LEFT JOIN points AS p
     ON r.finishPos = p.position
    AND ra.season = p.season
-GROUP BY r.cID, c.name;
+GROUP BY r.cID, c.name
+ORDER BY total_points DESC;
