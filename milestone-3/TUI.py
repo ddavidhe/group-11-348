@@ -263,7 +263,7 @@ class F1App(App):
             self.cursor.execute(weather_string)
             self.cursor.execute(laps_string)
 
-            with open("/advanced/feature-3/create_constructor_view.sql", "r") as data_file:
+            with open("advanced/feature-3/create_constructor_view.sql", "r") as data_file:
                 data_statements = data_file.read().split(";")
                 for ds in data_statements:
                     if ds.strip():
@@ -1311,7 +1311,12 @@ class F1App(App):
 
     @on(DataTable.RowSelected)
     def on_data_table_cell_selected(self, event: DataTable.RowSelected) -> None:
-        if event.row_key == "seedsample" or event.row_key == "seedprod":
+        if (
+            event.row_key == "seedsample"
+            or event.row_key == "seedprod"
+            or event.row_key == "advancedfeature2a"
+            or event.row_key == "advancedfeature2b"
+        ):
             self.query_one("#view", ContentSwitcher).current = event.row_key
         elif (
             event.row_key == "feature1"
@@ -1320,8 +1325,6 @@ class F1App(App):
             or event.row_key == "feature4"
             or event.row_key == "feature5"
             or event.row_key == "advancedfeature1"
-            or event.row_key == "advancedfeature2a"
-            or event.row_key == "advancedfeature2b"
             or event.row_key == "advancedfeature3"
             or event.row_key == "feature7b"
             or event.row_key == "feature7c"
