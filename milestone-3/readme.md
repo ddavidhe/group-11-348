@@ -46,6 +46,11 @@ To use the features, in the TUI application menu please use the arrow keys to se
 - Getting the time difference between a selected driver's first lap and pit laps, for a selected race.
 - Getting information on every driver's performance in a given lap of a given race.
 - Allowing users to disqualify drivers from a given race. This involves dropping them to P20 and bumping everyone lower than them up.
+- Viewing the historical statistics of a given driver for a track or all tracks in a given country. Uses relevant text matching so users only need to input plaintext rather than ID values.
+- User authorization. Users with edit access may create new user accounts (username + password) and may grant said users with edit access as well. Users without edit access cannot seed the database nor can they use features that modify the underlying data, such as disqualifying a driver.
+- Compare the performance of two constructors, viewing a head-to-head results table for all races that they both competed in. Uses a view for a more efficient query execution.
+- Delete entire races/drivers/constructors. This deletion also removes all related instances of itself using the `ON DELETE CASCADE` keyword.
+- Get the total points for all constructors across all historical seasons. Uses a join hint (hash join) for a more efficient query execution.
 
 ## 6. Production Database
 The production database was generated with the Jupyter Notebooks found in `milestone-3/production_data/data_collection`. To generate them, simply click run.
@@ -61,3 +66,8 @@ To use the features, in the TUI application menu please use the arrow keys to se
 - Getting information on every driver's performance in a given lap of a given race. The SQL implementation is found in `milestone-3/queries/feature-4/lap_info.sql`.
 - Allowing users to disqualify drivers from a given race. This involves dropping them to P20 and bumping everyone lower than them up. The SQL implementation is found in `milestone-3/queries/feature-5/disqualify.sql`.
 - Disqualifying a driver from a specific race. The SQL implementation is found in `milestone-3/queries/feature-5/disqualify.sql`.
+- Viewing the historical statistics of a given driver for a track or all tracks in a given country. Uses relevant text matching so users only need to input plaintext rather than ID values. The SQL implementation is found in `milestone-3/advanced/feature-1/driver_track_history.sql`.
+- User authorization. Users with edit access may create new user accounts (username + password) and may grant said users with edit access as well. Users without edit access cannot seed the database nor can they use features that modify the underlying data, such as disqualifying a driver. The SQL implementation is found in `milestone-3/TUI.py`. Relevant code blocks include `279-296` and `457-485`.
+- Compare the performance of two constructors, viewing a head-to-head results table for all races that they both competed in. Uses a view for a more efficient query execution. The SQL implementation for the view is found in `milestone-3/advanced/feature-3/create_constructor_view.sql` and the SQL implementation for the query is found in `milestone-3/advanced/feature-3/constructor_master.sql`.
+- Delete entire races/drivers/constructors. This deletion also removes all related instances of itself using the `ON DELETE CASCADE` keyword. The SQL implementation is found in `milestone-3/advanced/feature-7/delete_constructor.sql`, `milestone-3/advanced/feature-7/delete_driver.sql`, and `milestone-3/advanced/feature-7/delete_race.sql`.
+- Get the total points for all constructors across all historical seasons. Uses a join hint (hash join) for a more efficient query execution. The SQL implementation is found in `milestone-3/advanced/feature-8/constructor_points.sql`.
